@@ -1,0 +1,205 @@
+    <div class="main-panel">
+      
+        <!-- thông tin quản lý -->
+        <div class="profile-container">
+          <h3 class="title">👤 Thông tin của quản lý kho</h3>
+
+          <div class="profile-card shadow-lg">
+            <div class="profile-left">
+              <img [src]="userInfo?.image_url || 'assets/img/default-avatar.png'" alt="avatar" class="avatar-img">
+              <button class="btn btn-update mt-3" (click)="toggleUserInfoForm()">
+                ✏️ {{  showUserInfoForm  ? 'Đóng' : 'Cập nhật thông tin' }}
+              </button>
+            </div>
+
+            <div class="profile-right">
+              <p><strong>Họ tên:</strong> {{ userInfo?.full_name || 'Chưa có' }}</p>
+              <p><strong>Ngày sinh:</strong>  {{ userInfo?.date_of_birth ? (userInfo.date_of_birth | date:'dd/MM/yyyy') : 'Chưa có' }}</p>
+              <p><strong>Giới tính:</strong> {{ userInfo?.gender || 'Chưa có' }}</p>
+              <p><strong>Địa chỉ:</strong> {{ userInfo?.address || 'Chưa có' }}</p>
+              <p><strong>SĐT:</strong> {{ userInfo?.phone || 'Chưa có' }}</p>
+            </div>
+          </div>
+
+          <!-- hiện form cập nhật -->
+          <form *ngIf=" showUserInfoForm " class="form-card shadow-sm mt-4" (ngSubmit)="submitInfo()" #form="ngForm">
+            <h5>📥 Nhập hoặc cập nhật thông tin</h5>
+            <div class="form-group">
+              <label>Họ tên</label>
+              <input [(ngModel)]="formData.full_name" name="full_name" class="form-control" placeholder="Nguyễn Văn A">
+            </div>
+            <div class="form-group">
+              <label>Ngày sinh</label>
+              <!-- Ngăn không cho ngày sinh chọn sau hôm nay -->
+              <input type="date" [(ngModel)]="formData.date_of_birth" name="dob" class="form-control" [max]="today">
+            </div>
+            <div class="form-group">
+              <label>Giới tính</label>
+              <select [(ngModel)]="formData.gender" name="gender" class="form-control">
+                <option value="">-- Chọn giới tính --</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Địa chỉ</label>
+              <input [(ngModel)]="formData.address" name="address" class="form-control" placeholder="123 Đường ABC, Quận X">
+            </div>
+            <div class="form-group">
+              <label>Số điện thoại</label>
+              <input [(ngModel)]="formData.phone" name="phone" class="form-control" placeholder="0987654321">
+            </div>
+            <div class="form-group">
+              <label>Ảnh đại diện</label>
+              <input type="file" (change)="onFileSelected($event)" class="form-control">
+            </div>
+            <button class="btn btn-primary w-100 mt-3" type="submit"> Lưu thông tin</button>
+          </form>
+        </div>
+
+        <!-- DANH SÁCH NHÂN VIÊN -->
+        <div class="container mt-4">
+
+          <!-- Tiêu đề danh sách -->
+          <h2 class="mt-3 mb-2">📋 Danh sách tài khoản</h2>
+          
+          <br>
+
+          <!-- ✅ Sticky Thanh tìm kiếm + lọc -->
+          <div class="sticky-nav">
+            <nav class="navbar navbar-header navbar-expand-lg border-bottom">
+              <div class="search-filter-container d-flex flex-wrap gap-2 align-items-center">
+
+                <!-- 🔍 Tìm kiếm theo tên -->
+                <div class="input-group search-input">
+                  <input type="text" class="form-control" placeholder="Tìm theo tên..."
+                        [(ngModel)]="searchKeyword" (input)="filterUsers()" />
+                </div>
+
+                <!-- 📂 Bộ lọc vai trò -->
+                <select class="form-select role-select" [(ngModel)]="selectedRole" (change)="filterUsers()">
+                  <option value="">-- Tất cả vai trò --</option>
+                  <option value="user">Nhân viên</option>
+                  <option value="admin">Quản trị</option>
+                </select>
+
+                <!-- 📌 Bộ lọc trạng thái -->
+                <select class="form-select role-select" [(ngModel)]="selectedStatus" (change)="filterUsers()">
+                  <option value="">-- Tất cả trạng thái --</option>
+                  <option value="active">Hoạt động</option>
+                  <option value="inactive">Ngưng</option>
+                </select>
+
+                <!-- Nút Thêm -->
+                <button class="btn btn-primary ms-auto" (click)="showAccountForm = true">
+                  Thêm tài khoản
+                </button>
+              </div>
+            </nav>
+          </div>
+
+          <br>
+
+          <!-- Bảng tài khoản -->
+          <table class="table table-bordered table-hover mt-2">
+            <thead class="table-dark text-center">
+              <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of filteredUsers; let i = index" class="align-middle text-center">
+                <td>{{ i + 1 }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  {{ user.role === 'user' ? 'Nhân viên' : (user.role === 'admin' ? 'Quản lý kho' : 'Không xác định') }}
+                </td>
+                <td>
+                 <select  
+                    class="status-select"
+                    [ngClass]="user.status === 'active' ? 'status-active' : 'status-inactive'"
+                    [(ngModel)]="user.status"
+                    (change)="updateStatus(user)">
+                    <option value="active">Hoạt động</option>
+                    <option value="inactive">Ngưng</option>
+                  </select>
+                </td>
+                <td>
+                  <button class="btn-view" (click)="xemThongTin(user)">Xem thông tin</button>
+                  <!--<button class="btn btn-sm btn-outline-danger" (click)="xoaTaiKhoan(user.id)"> Xoá</button>-->
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+
+        <!-- hiện form xem thông tin -->
+         <!-- ✅ Popup hiển thị khi xem -->
+          <!-- ✅ Popup hiển thị khi xem -->
+          <div class="modal-backdrop" *ngIf="selectedUser">
+            <div class="modal-content p-4 profile-modal">
+
+              <div class="text-end mb-3">
+                <button class="btn btn-sm btn-danger" (click)="selectedUser = null">Đóng</button>
+              </div>
+
+              <div class="profile-container">
+                <h3 class="title">👤 Thông tin tài khoản</h3>
+
+                <div class="profile-card shadow-lg">
+                  <div class="profile-left">
+                    <img [src]="selectedUser?.image_url || 'assets/img/default-avatar.png'" alt="avatar" class="avatar-img" />
+                  </div>
+
+                  <div class="profile-right">
+                    <p><strong>Họ tên:</strong> {{ selectedUser?.full_name || 'Chưa có' }}</p>
+                    <p><strong>Ngày sinh:</strong> {{ selectedUser?.date_of_birth || 'Chưa có' }}</p>
+                    <p><strong>Giới tính:</strong> {{ selectedUser?.gender || 'Chưa có' }}</p>
+                    <p><strong>Địa chỉ:</strong> {{ selectedUser?.address || 'Chưa có' }}</p>
+                    <p><strong>Số điện thoại:</strong> {{ selectedUser?.phone || 'Chưa có' }}</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
+          <!-- Form Thêm Tài Khoản -->
+          <div *ngIf="showAccountForm" class="modal-backdrop">
+            <div class="modal-content">
+              <h3>Thêm tài khoản</h3>
+
+              <label>Họ và tên:</label>
+              <input type="text" [(ngModel)]="newUser.name" placeholder="Nhập tên tài khoản" />
+
+              <label>Email:</label>
+              <input type="email" [(ngModel)]="newUser.email" placeholder="Nhập email" />
+
+              <label>Mật khẩu:</label>
+              <input type="password" [(ngModel)]="newUser.password" placeholder="Nhập mật khẩu" />
+
+              <label>Vai trò:</label>
+              <select [(ngModel)]="newUser.role">
+                <option value="user">Nhân viên</option>
+                <option value="admin">Quản trị</option>
+              </select>
+
+              <div class="form-buttons">
+                <button class="btn btn-success" (click)="themTaiKhoan()">Lưu</button>
+                <button class="btn btn-secondary" (click)="showAccountForm = false">Hủy</button>
+              </div>
+            </div>
+          </div>
+          
+
+
+        
+    </div>

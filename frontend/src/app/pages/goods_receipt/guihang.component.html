@@ -1,0 +1,296 @@
+
+<body style="background-color: beige;">
+
+  <div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="form-container" style="padding-top: 5%">
+            <h2>PHIẾU NHẬP KHO - WAREHOUSE MANAGER T&H</h2>
+
+            <div class="header-top">
+              <button type="button" (click)="resetForm()" class="btn-reset">🔄 Tạo lại</button>
+            </div>
+
+            <form (ngSubmit)="submitForm()" enctype="multipart/form-data">
+              <!-- Ngày tạo -->
+              <div class="row">
+                <label>Ngày tạo:</label>
+                <input type="date" [(ngModel)]="formData.created_date" name="created_date" readonly>
+
+                <label>Mã phiếu:</label>
+                <input type="text" [value]="generatedReceiptCode || 'Đang tạo...'" readonly>
+              </div>
+
+              <!-- Tên nhà cung cấp -->
+              <div class="row">
+                <label>Tên nhà cung cấp:</label>
+                <input [(ngModel)]="formData.supplier_name" name="supplier_name" required (ngModelChange)="onFieldChange()">
+              </div>
+
+              <!-- Logo nhà cung cấp -->
+              <div class="row">
+                <label>Logo nhà cung cấp:</label>
+                <input type="file" accept="image/*" (change)="onLogoChange($event)">
+                <img *ngIf="formData.logoPreview" [src]="formData.logoPreview" class="preview-img">
+              </div>
+
+              <!-- Địa chỉ nhà cung cấp -->
+              <div class="row">
+                <label>Địa chỉ nhà cung cấp:</label>
+                <input type="text" [(ngModel)]="formData.supplier_address" name="supplier_address" required (ngModelChange)="onFieldChange()">              </div>
+
+              <!-- Thông tin đại diện nhà cung cấp -->
+              <div class="info-card">
+                <h4>Thông tin liên lạc nhà cung cấp</h4>
+                <div class="row">
+                  <label>Họ và tên đại diện:</label>
+                  <input type="text" [(ngModel)]="formData.representative_name" name="representative_name" required (ngModelChange)="onFieldChange()">
+                </div>
+
+                <div class="row">
+                  <label>Email đại diện:</label>
+                  <input type="email" [(ngModel)]="formData.representative_email" name="representative_email" required (ngModelChange)="onFieldChange()">
+                </div>
+
+                <div class="row">
+                  <label>Số điện thoại:</label>
+                  <input type="text" [(ngModel)]="formData.representative_phone" name="representative_phone" required (ngModelChange)="onFieldChange()">
+                </div>
+              </div>
+
+              <!-- 🔔 Ghi chú yêu cầu cập nhật đầy đủ thông tin -->
+              <div class="alert alert-warning" style="margin-bottom: 15px; background-color: #fff3cd; padding: 10px; border-left: 5px solid #ffc107;">
+                 <strong>Lưu ý:</strong> Phiếu chỉ được gửi khi bạn cập nhật đầy đủ thông tin nhân viên.
+              </div>
+
+              <div class="info-card">
+                <!-- Tên nhân viên -->
+                <div class="row">
+                  <label>Tên nhân viên tạo phiếu</label>
+                  <input type="text" [value]="userInfo.full_name" readonly>
+                </div>
+                
+                <!-- Tài khoản nhân viên-->
+                <div class="row">
+                  <label>Tài khoản nhân viên tạo phiếu</label>
+                  <input type="text" [value]="userEmail" readonly>
+                </div>
+              </div>
+
+
+              <h4>Danh sách sản phẩm nhập kho</h4>
+
+              <!-- Nhập mã & nút thêm: gọn, nằm ngang -->
+              <div style="display: flex; align-items: flex-end; gap: 10px; margin-bottom: 12px;">
+                <label style="white-space: nowrap;">🔍 Mã sản phẩm có sẵn (trường hợp cung cấp hàng):</label>
+                <input 
+                  type="text" 
+                  [(ngModel)]="maSanPhamCanThem" 
+                  name="maSanPhamCanThem" 
+                  placeholder="VD: SP001"
+                  style="width: 160px; padding: 4px 8px;" 
+                />
+                <button 
+                  type="button" 
+                  (click)="themSanPhamCoSan()" 
+                  style="padding: 5px 12px; white-space: nowrap;"
+                >
+                  Thêm
+                </button>
+              </div>
+
+
+
+              <div style="overflow-x: auto;" class="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Hình ảnh</th>
+                      <th>Mã sản phẩm</th>
+                      <th>Tên sản phẩm</th>
+                      <th>Loại</th>
+                      <th>Đơn vị</th>
+                      <th>Ngày sản xuất</th>
+                      <th>Hạn sử dụng</th>
+                      
+                      <th>Số lượng</th>
+                      <th>Trọng lượng 1 sản phẩm (KG)</th> <!-- 🆕 Cột mới -->
+                      <th>Trọng lượng lô hàng (KG)</th>
+                      <th>Diện tích (m<sup>2</sup>)</th>
+
+                      <th>Đơn giá</th>
+                      <th>Thành tiền</th>
+                      <th>Xoá</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of formData.products; let i = index">
+                      <td>{{ i + 1 }}</td>
+
+                      <!-- Ảnh -->
+                      <td>
+                        <input *ngIf="!item.readonly" type="file" accept="image/*" (change)="onProductImageChange($event, i)">
+                        <img *ngIf="item.preview" [src]="item.preview" class="preview-img-small">
+                      </td>
+
+                      <!-- Mã sản phẩm -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableCode">
+                          <span>{{ item.product_code }}</span>
+                        </ng-container>
+                        <ng-template #editableCode>
+                          <input [(ngModel)]="item.product_code" name="code{{i}}" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Tên sản phẩm -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableName">
+                          <span>{{ item.product_name }}</span>
+                        </ng-container>
+                        <ng-template #editableName>
+                          <input [(ngModel)]="item.product_name" name="product_name{{i}}" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Loại -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableType">
+                          <span>{{ item.product_type }}</span>
+                        </ng-container>
+                        <ng-template #editableType>
+                          <input [(ngModel)]="item.product_type" name="type{{i}}" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Đơn vị -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableUnit">
+                          <span>{{ item.unit }}</span>
+                        </ng-container>
+                        <ng-template #editableUnit>
+                          <input [(ngModel)]="item.unit" name="unit{{i}}" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Ngày sản xuất -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableNSX">
+                          <span>{{ item.manufacture_date }}</span>
+                        </ng-container>
+                        <ng-template #editableNSX>
+                          <input [(ngModel)]="item.manufacture_date" name="nsx{{i}}" type="date" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Hạn sử dụng -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editableHSD">
+                          <span>{{ item.expiry_date }}</span>
+                        </ng-container>
+                        <ng-template #editableHSD>
+                          <input [(ngModel)]="item.expiry_date" name="hsd{{i}}" type="date" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+                      <!-- Số lượng -->
+                      <td>
+                        <input [(ngModel)]="item.quantity" name="quantity{{i}}" type="number" required 
+                              (ngModelChange)="updateWeightAndArea(i); onFieldChange()">
+                      </td>
+
+                      <!-- Trọng lượng 1 SP -->
+                      <td>
+                        <div style="display: flex; align-items: center;">
+                          <ng-container *ngIf="item.readonly; else editableKg">
+                            <span>{{ item.kg_per_unit }} kg</span>
+                          </ng-container>
+                          <ng-template #editableKg>
+                            <input [(ngModel)]="item.kg_per_unit" name="kgperunit{{i}}" type="number" required
+                                  style="width: 80px;" (input)="updateWeightAndArea(i); onFieldChange()">
+                          </ng-template>
+                        </div>
+                      </td>
+
+                      <!-- Trọng lượng lô hàng -->
+                      <td>
+                        <div style="display: flex; align-items: center;">
+                          <input 
+                            [(ngModel)]="item.weight" 
+                            name="weight{{i}}" 
+                            type="number" 
+                            (input)="updateKgPerUnit(i)" 
+                            style="width: 80px;"
+                          /> <!-- 👈 Thêm vào đây -->
+                          <span style="margin-left: 4px;">kg</span>
+                        </div>
+                      </td>
+
+
+                      <!-- Diện tích -->
+                      <td>
+                        <div style="display: flex; align-items: center;">
+                          <input [(ngModel)]="item.area" name="area{{i}}" type="number" readonly
+                                style="width: 80px; background-color: #f9f9f9;">
+                          <span style="margin-left: 4px;">m²</span>
+                        </div>
+                      </td>
+
+                      <!-- Đơn giá -->
+                      <td>
+                        <ng-container *ngIf="item.readonly; else editablePrice">
+                          <span>{{ item.unit_price | number:'1.0-0' }}</span>
+                        </ng-container>
+                        <ng-template #editablePrice>
+                          <input [(ngModel)]="item.unit_price" name="price{{i}}" type="number" required (ngModelChange)="onFieldChange()">
+                        </ng-template>
+                      </td>
+
+
+                      <!-- Thành tiền -->
+                      <td>{{ item.quantity * item.unit_price | number:'1.0-0' }}</td>
+
+                      <!-- Xoá -->
+                      <td>
+                        <button type="button" (click)="removeProduct(i)">❌</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <button type="button" (click)="addProduct()">Thêm khung nhập</button>
+
+              <br>
+
+              <!-- Tổng cộng -->
+              <div class="row total-row">
+                <h4>Tổng cộng: <span>{{ calculateTotal() | number:'1.0-0' }} VNĐ</span></h4>
+              </div>
+
+              <!-- Ngày hẹn gặp mặt -->
+              <div class="row">
+                <label>Ngày hẹn nhập hàng:</label>
+                <input type="date" [(ngModel)]="formData.appointment_date" name="appointment_date" required (ngModelChange)="onFieldChange()">
+              </div>
+
+              <!-- Ghi chú -->
+              <div class="row">
+                <label>Ghi chú cho quản lý kho (nếu có):</label>
+                <textarea rows="4" [(ngModel)]="formData.note" name="note" placeholder="Nhập ghi chú nếu có..." (ngModelChange)="onFieldChange()"></textarea>
+              </div>
+
+
+              <!-- Gửi -->
+              <button type="submit" class="submit-btn">✅ Gửi phiếu nhập hàng</button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>

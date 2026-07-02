@@ -1,0 +1,135 @@
+<div class="container mt-4">
+  <h1 class="mb-4"> Lịch sử các đợt kiểm kê</h1>
+
+<div class="row g-3 align-items-end mb-4">
+  <div class="col-lg-2 col-md-4 col-sm-6">
+    <label class="form-label"> Mã đợt</label>
+    <input [(ngModel)]="boLoc.maDot" type="text" class="form-control" placeholder="Nhập mã đợt" />
+  </div>
+
+  <div class="col-lg-2 col-md-4 col-sm-6">
+    <label class="form-label"> Tên đợt</label>
+    <input [(ngModel)]="boLoc.tenDot" type="text" class="form-control" placeholder="Nhập tên đợt" />
+  </div>
+
+  <div class="col-lg-2 col-md-4 col-sm-6">
+    <label class="form-label"> Người tạo</label>
+    <input [(ngModel)]="boLoc.nguoiTao" type="text" class="form-control" placeholder="Email người tạo" />
+  </div>
+
+  <div class="col-lg-2 col-md-4 col-sm-6">
+    <label class="form-label"> Ngày tạo</label>
+    <input [(ngModel)]="boLoc.ngayTao" type="date" class="form-control" />
+  </div>
+
+  <div class="col-lg-2 col-md-4 col-sm-6">
+    <label class="form-label"> Số sản phẩm kiểm</label>
+    <input [(ngModel)]="boLoc.stt" type="number" class="form-control" placeholder="VD: 5" />
+  </div>
+</div>
+
+
+
+  <table class="table table-bordered table-hover align-middle text-center">
+    <thead class="table-light">
+      <tr class="table-secondary">
+        <th>Mã đợt</th>
+        <th>Tên đợt</th>
+        <th>Ngày tạo</th>
+        <th>Người tạo</th>
+        <th>Thao tác</th>
+      </tr>
+    </thead>
+    <tbody>
+     <ng-container *ngFor="let dot of locDanhSachDot()">
+        <!-- Dòng chính -->
+        <tr>
+          <td>{{ dot.ma_dot }}</td>
+          <td>{{ dot.ten_dot }}</td>
+          <td>{{ dot.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ dot.created_by_email }}</td>
+          <td>
+            <button class="btn btn-sm btn-info me-2" (click)="toggleChiTiet(dot)">
+              {{ moChiTiet[dot.id] ? ' Đóng' : ' Xem' }}
+            </button>
+            <button class="btn btn-sm btn-success" (click)="xuatExcel(dot.id)">
+               Xuất Excel
+            </button>
+          </td>
+        </tr>
+
+        <!-- Dòng chi tiết -->
+        <tr *ngIf="moChiTiet[dot.id]">
+          <td colspan="5">
+            <div *ngIf="isValidArray(chiTietTheoDot[dot.id]); else dangTai">
+              <h2 class="text-start mb-3">
+                📑 Chi tiết: <strong>{{ dot.ten_dot }}</strong> ({{ dot.ma_dot }})
+              </h2>
+
+             <table class="table table-sm table-bordered align-middle">
+                <thead class="table-secondary">
+                  <tr class="nen-th">
+                    <th>STT</th>
+                    <th>Hình</th>
+                    <th>Mã sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Khu vực</th>
+                    <th>Tồn kho</th>
+                    <th>Thực tế</th>
+                    <th>Tình trạng</th>
+                    <th>Ghi chú</th>
+                    <th>Người kiểm</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                <tr *ngFor="let sp of chiTietTheoDot[dot.id]; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>
+                    <img
+                        [src]="sp.image_url || 'https://via.placeholder.com/40?text=No+Img'"
+                        width="40"
+                        height="40"
+                        class="rounded shadow-sm"
+                        style="object-fit: cover;"
+                        alt="Ảnh SP"
+                    />
+                    </td>
+                    <td>{{ sp.product_code }}</td>
+                    <td>{{ sp.product_name }}</td>
+                    <td>{{ sp.ten_khu_vuc }}</td>
+                    <td class="fw-bold">{{ sp.system_quantity }}</td>
+                    <td class="fw-bold">{{ sp.actual_quantity ?? '❌' }}</td>
+                    <td>
+                    <ng-container *ngIf="sp.actual_quantity != null; else chuaKiem">
+                        <span *ngIf="sp.actual_quantity === sp.system_quantity" class="text-success fw-bold">🟢 Đủ</span>
+                        <span *ngIf="sp.actual_quantity < sp.system_quantity" class="text-danger fw-bold">
+                        🔴 Thiếu {{ sp.system_quantity - sp.actual_quantity }}
+                        </span>
+                        <span *ngIf="sp.actual_quantity > sp.system_quantity" class="text-warning fw-bold">
+                        🟡 Dư {{ sp.actual_quantity - sp.system_quantity }}
+                        </span>
+                    </ng-container>
+                    <ng-template #chuaKiem>⏳ Chưa kiểm</ng-template>
+                    </td>
+                    <td>{{ sp.ghi_chu || '—' }}</td>
+                    <td>{{ sp.checked_by_email || '—' }}</td>
+                </tr>
+                </tbody>
+
+              </table>
+            </div>
+
+            <ng-template #dangTai>
+              <div class="text-muted">⏳ Đang tải chi tiết...</div>
+            </ng-template>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <div *ngIf="danhSachDot.length === 0" class="alert alert-warning text-center">
+    ❗ Chưa có lịch sử kiểm kê nào.
+  </div>
+</div>

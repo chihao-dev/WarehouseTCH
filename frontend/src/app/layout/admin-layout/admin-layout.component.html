@@ -1,0 +1,89 @@
+<div class="wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+   <!-- Sau logo và greeting -->
+    <div class="sidebar-toggle-container">
+      <!-- Nút mở (☰) nằm bên trái khi đang đóng -->
+      <button 
+        class="toggle-sidebar-btn left-btn" 
+        *ngIf="isSidebarCollapsed" 
+        (click)="toggleSidebar()">
+        ☰
+      </button>
+    </div>
+
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" [class.collapsed]="isSidebarCollapsed" data-background-color="dark">
+
+     <!-- ✅ Logo & greeting -->
+    <div class="sidebar-logo">
+      <div class="logo-header" data-background-color="dark">
+        <a href="/admin/dashboard" class="logo">
+          <img src="../../../assets/img/logogpt.png" alt="navbar brand" class="navbar-brand" width="100%" height="50px">
+        </a>
+
+        <div class="user-greeting dropdown" *ngIf="isLoggedIn">
+          <a href="#" data-bs-toggle="dropdown" aria-expanded="false">👋 Xin chào, {{ userName }}</a>
+        </div>
+
+         <!-- ✅ Nút ✖ nằm cùng hàng, sát phải -->
+          <button 
+            class="toggle-sidebar-btn-close-btn" 
+            *ngIf="!isSidebarCollapsed" 
+            (click)="toggleSidebar()">
+            ✖
+          </button>
+      </div>
+    </div>
+
+    <div class="sidebar-wrapper">
+      <div class="sidebar-content">
+        <ul class="nav nav-secondary">
+          <li class="nav-item"><a href="/admin/dashboard" class="nav-link"><p>Thống kê dữ liệu kho</p></a></li>
+          
+          <li class="nav-section"><h4 class="text-section" style="white-space: nowrap; width: auto; display: inline-block;">
+            Chức năng duyệt phiếu
+          </h4></li>
+          <li class="nav-item">
+            <a href="/admin/review_receipt" class="nav-link">
+              <div class="badge-wrapper">
+                <p>Duyệt phiếu nhập</p>
+                <span *ngIf="soPhieuNhapChoDuyet > 0" class="badge-top">{{ soPhieuNhapChoDuyet }}</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="/admin/review_issue" class="nav-link">
+              <div class="badge-wrapper">
+                <p>Duyệt phiếu xuất</p>
+                <span *ngIf="soPhieuXuatChoDuyet > 0" class="badge-top">{{ soPhieuXuatChoDuyet }}</span>
+              </div>
+            </a>
+          </li>
+
+          <li class="nav-section"><h4 class="text-section" style="white-space: nowrap; width: auto; display: inline-block;">
+            Quản lý hàng hóa, khu vực
+          </h4></li>
+          <li class="nav-item"><a href="/admin/products_manager" class="nav-link"><p>Quản lý sản phẩm</p></a></li>
+          <li class="nav-item"><a href="/admin/inventory_manager" class="nav-link"><p>Quản lý hàng tồn</p></a></li>
+          <li class="nav-item"><a href="/admin/inventory_history" class="nav-link"><p>Lịch sử kiểm kê</p></a></li>
+          <li class="nav-item"><a href="/admin/location_manager" class="nav-link"><p>Quản lý vị trí , khu vực</p></a></li>
+
+          <li class="nav-section"><h4 class="text-section" style="white-space: nowrap; width: auto; display: inline-block;">
+            Quản lý tài khoản , hóa đơn
+          </h4></li>
+          <li class="nav-item"><a href="/admin/account_manager" class="nav-link"><p>Quản lý tài khoản</p></a></li>
+          <li class="nav-item"><a href="/admin/supplier_manager" class="nav-link"><p>Quản lý nhà cung cấp</p></a></li>
+          <li class="nav-item"><a href="/admin/invoice_manager" class="nav-link"><p>Quản lý hóa đơn</p></a></li>
+          
+          <li class="nav-item" *ngIf="isLoggedIn"><a href="#" class="nav-link text-danger" (click)="logout()"><p style="color: rgb(192, 23, 23)">Đăng xuất</p></a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nội dung chính -->
+<div class="main-panel" [class.full-width]="isSidebarCollapsed">
+  <router-outlet></router-outlet>
+</div>
+</div>

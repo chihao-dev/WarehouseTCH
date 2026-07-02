@@ -1,0 +1,439 @@
+<div class="main-panel">
+
+  <h1>Quản lý sản phẩm</h1>
+
+  <!-- Bộ lọc nâng cao -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Khu vực:</label>
+      <select [(ngModel)]="selectedKhuVuc" (change)="onKhuVucChange()">
+      <option value="">Tất cả khu</option>
+      <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.id">{{ kv.ten_khu_vuc }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Tìm kiếm:</label>
+      <input type="text" [(ngModel)]="keyword" placeholder=" Mã hoặc tên sản phẩm" />
+    </div>
+
+    <div class="filter-group">
+      <label>Loại hàng:</label>
+      <select [(ngModel)]="selectedType">
+      <option value="">Tất cả loại</option>
+      <option *ngFor="let type of loaiHang" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Ngày nhập:</label>
+      <input id="fromDate" type="date" [(ngModel)]="fromDate" />
+    </div>
+
+    <div class="filter-group">
+      <label>Hạn sử dụng:</label>
+      <input id="toDate" type="date" [(ngModel)]="toDate" />
+    </div>
+
+    <div class="filter-group">
+    <label>💰 Giá từ:</label>
+    <input type="number" [(ngModel)]="minPrice" placeholder="Min" />
+  </div>
+
+  <div class="filter-group">
+    <label>💰 đến:</label>
+    <input type="number" [(ngModel)]="maxPrice" placeholder="Max" />
+  </div>
+
+    <div class="filter-group full">
+      <button (click)="layDanhSachSanPham()"> Lọc sản phẩm</button>
+    </div>
+  </div>
+
+    <!-- Popup thêm sản phẩm -->
+    <!-- Popup thêm sản phẩm -->
+    <div class="popup-overlay" *ngIf="hienPopupThem" (click)="hienPopupThem = false"> </div>
+    <div class="popup" *ngIf="hienPopupThem">
+      <h3>➕ Nhập sản phẩm mới</h3>
+      <button class="close-btn" (click)="hienPopupThem = false">✖</button>
+
+      <form (submit)="themSanPham()">
+        <div class="form-grid">
+          <label>Mã sản phẩm:</label>
+          <input [(ngModel)]="spMoi.product_code" name="ma" required />
+
+          <label>Tên sản phẩm:</label>
+          <input [(ngModel)]="spMoi.product_name" name="ten" required />
+
+          <label>Loại hàng:</label>
+          <input [(ngModel)]="spMoi.product_type" name="loai" required />
+
+          <label>Đơn vị:</label>
+          <input [(ngModel)]="spMoi.unit" name="donvi" />
+
+          <label>Số lượng:</label>
+          <input type="number" [(ngModel)]="spMoi.quantity" name="soluong" />
+
+          <label>Khối lượng:</label>
+          <input type="number" [(ngModel)]="spMoi.weight" name="kl" />
+
+          <label>Diện tích:</label>
+          <input type="number" [(ngModel)]="spMoi.area" name="dt" />
+
+          <label>Ngày sản xuất:</label>
+          <input type="date" [(ngModel)]="spMoi.manufacture_date" name="nsx" />
+
+          <label>Hạn sử dụng:</label>
+          <input type="date" [(ngModel)]="spMoi.expiry_date" name="hsd" />
+
+          <label>Giá mỗi đơn vị:</label>
+          <input type="number" [(ngModel)]="spMoi.unit_price" name="gia" />
+
+          <label>Khu vực:</label>
+          <select [(ngModel)]="spMoi.khu_vuc_id" name="khuvuc">
+            <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.id">{{ kv.ten_khu_vuc }}</option>
+          </select>
+
+         <!-- Ảnh sản phẩm -->
+        <label>Ảnh sản phẩm:</label>
+        <input type="file" (change)="chonFileAnh($event)" />
+        <img *ngIf="previewAnh" [src]="previewAnh" width="150" height="auto"
+            style="margin-top: 8px; border: 1px solid #ccc; border-radius: 8px;" />
+
+        <!-- Tên NCC -->
+        <label>Tên nhà cung cấp:</label>
+        <input [(ngModel)]="spMoi.supplier_name" name="ncc" />
+
+        <!-- Logo NCC -->
+        <label>Thay logo NCC (nếu cần):</label>
+        <input type="file" (change)="chonFileLogo($event)" />
+        <label>Logo hiện tại của NCC:</label>
+        <img *ngIf="previewLogo || spMoi.logo_url"
+            [src]="previewLogo || spMoi.logo_url"
+            width="120" height="auto"
+            style="margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px;" />
+
+        </div>
+
+        <button class="btn-luu" type="submit">📥 Lưu</button>
+      </form>
+    </div>
+
+  <!-- Bảng dữ liệu -->
+  <!-- Bảng dữ liệu -->
+    <table class="product-table">
+    <thead class="sticky">
+        <tr>
+        <th> Hình</th>
+        <th> Mã sản phẩm</th>
+        <th> Tên sản phẩm</th>
+        <th> Loại</th>
+        <th> Tổng số lượng</th>
+        <th> Hạn sử dụng</th>
+        <th> Giá</th>
+        <th> Khu vực</th>
+        <th> Ngày nhập</th>
+        <th> Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let sp of danhSachSanPham" (click)="moPopupChiTiet(sp)">
+        <td><img [src]="sp.image_url" width="50" /></td>
+
+        <!-- Chừa Mã SP: không dính sự kiện click dòng -->
+        <td (click)="$event.stopPropagation()">
+        <div class="barcode-text">{{ sp.product_code }}</div>
+        </td>
+        <td class="ellipsis">{{ sp.product_name }}</td>
+        <td>{{ sp.product_type }}</td>
+        <td>{{ sp.quantity }}</td>
+        <td>{{ sp.expiry_date | date: 'shortDate' }}</td>
+        <td>{{ sp.unit_price | number }}</td>
+        <td class="ellipsis">{{ sp.ten_khu_vuc }}</td>
+        <td>{{ sp.import_date | date: 'shortDate' }}</td>
+
+        <!-- Cột thao tác cũng chặn click -->
+        <!-- Cột thao tác hiển thị theo cột, chặn sự kiện click -->
+        <td (click)="$event.stopPropagation()" class="action-buttons column-buttons">
+        <button class="btn btn-edit" (click)="moPopupCapNhat(sp); $event.stopPropagation()">Cập nhật</button>
+        <button class="btn btn-delete" (click)="xoaSanPham(sp.product_code); $event.stopPropagation()">Xóa</button>
+        </td>
+
+    </tr>
+    </tbody>
+    </table>
+
+    <!-- Popup chi tiết sản phẩm -->
+    <div class="popup" *ngIf="hienPopupChiTiet">
+    <h3>Chi tiết sản phẩm</h3>
+    <button class="close-btn" (click)="dongPopup()">✖</button>
+
+    <div class="popup-content">
+        <div class="left sticky-container">
+          <!-- Ảnh sản phẩm -->
+          <img [src]="sanPhamDuocChon.image_url" alt="Hình sản phẩm" />
+
+          <!-- Mã vạch lớn bên dưới -->
+          <div class="barcode-wrapper" *ngIf="sanPhamDuocChon.product_code">
+            <img
+              [src]="'https://barcode.tec-it.com/barcode.ashx?data=' + sanPhamDuocChon.product_code + '&code=Code128&translate-esc=false'"
+              alt="Mã vạch"
+            />
+            <!-- Hiện mã số bên dưới mã vạch -->
+            <p class="barcode-text">{{ sanPhamDuocChon.product_code }}</p>
+          </div>
+        </div>
+
+
+        <div class="right">
+        <div class="section">
+            <h4>Thông tin sản phẩm</h4>
+            <p><strong>Mã SP:</strong> {{ sanPhamDuocChon.product_code }}</p>
+            <p><strong>Tên SP:</strong> {{ sanPhamDuocChon.product_name }}</p>
+            <p><strong>Loại hàng:</strong> {{ sanPhamDuocChon.product_type }}</p>
+            <p><strong>Đơn vị:</strong> {{ sanPhamDuocChon.unit }}</p>
+            <p><strong>Số lượng:</strong> {{ sanPhamDuocChon.quantity }}</p>
+            <p><strong>Ngày sản xuất:</strong> {{ sanPhamDuocChon.manufacture_date | date }}</p>
+            <p><strong>Hạn sử dụng:</strong> {{ sanPhamDuocChon.expiry_date | date }}</p>
+        </div>
+
+        <div class="section">
+          <h4> Thông số kỹ thuật</h4>
+          <p><strong>Khối lượng:</strong> {{ sanPhamDuocChon.weight | number:'1.1-1' }} kg</p>
+          <p><strong>Khối lượng mỗi đơn vị:</strong> {{ sanPhamDuocChon.weight_per_unit | number:'1.1-1' }} kg</p>
+          <p><strong>Diện tích:</strong> {{ sanPhamDuocChon.area | number:'1.1-1' }} m²</p>
+          <p><strong>Giá mỗi đơn vị:</strong> {{ sanPhamDuocChon.unit_price | number:'1.0-0' }}</p>
+          <p><strong>Thành tiền:</strong> {{ sanPhamDuocChon.total_price | number:'1.0-0' }}</p>
+        </div>
+
+
+
+        <div class="section">
+            <h4> Kho & nhập hàng</h4>
+            <p><strong>Khu vực:</strong> {{ sanPhamDuocChon.ten_khu_vuc }}</p>
+            <p><strong>Ngày nhập:</strong> {{ sanPhamDuocChon.import_date | date }}</p>
+        </div>
+
+        <div class="section supplier">
+            <h4> Nhà cung cấp</h4>
+            <div class="supplier-info">
+            <span>{{ sanPhamDuocChon.supplier_name }}</span>
+            <img *ngIf="sanPhamDuocChon.logo_url" [src]="sanPhamDuocChon.logo_url" />
+            </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Popup cập nhật sản phẩm -->
+    <div class="popup-overlay" *ngIf="hienPopupCapNhat" (click)="dongPopupCapNhat()"></div>
+    <div class="popup" *ngIf="hienPopupCapNhat">
+      <h3>Cập nhật sản phẩm</h3>
+      <button class="close-btn" (click)="dongPopupCapNhat()">✖</button>
+
+      <form (submit)="capNhatSanPham()">
+        
+        <!-- 🔹 THÔNG TIN CHUNG -->
+        <fieldset class="section">
+          <legend>Thông tin chung</legend>
+          <div class="form-grid">
+            <label>Mã sản phẩm:</label>
+            <input [(ngModel)]="sanPhamCapNhat.product_code" name="ma" required />
+
+            <label>Tên sản phẩm:</label>
+            <input [(ngModel)]="sanPhamCapNhat.product_name" name="ten" required />
+
+            <label>Loại hàng:</label>
+            <input [(ngModel)]="sanPhamCapNhat.product_type" name="loai" required />
+
+            <label>Đơn vị:</label>
+            <input [(ngModel)]="sanPhamCapNhat.unit" name="donvi" />
+          </div>
+        </fieldset>
+
+        <!-- 🔹 THÔNG SỐ KỸ THUẬT -->
+        <fieldset class="section">
+          <legend> Thông số kỹ thuật</legend>
+          <div class="form-grid">
+
+            <!-- Khối lượng (readonly) -->
+            <label>Khối lượng (kg):</label>
+            <input 
+              type="text"
+              [value]="sanPhamCapNhat.weight | number:'1.1-1'" 
+              readonly
+            />
+
+            <!-- Diện tích (readonly) -->
+            <label>Diện tích (m²):</label>
+            <input 
+              type="text"
+              [value]="sanPhamCapNhat.area | number:'1.1-1'" 
+              readonly
+            />
+
+            <!-- Khối lượng mỗi đơn vị -->
+             <!-- Khối lượng mỗi đơn vị -->
+            <label>Khối lượng mỗi đơn vị (kg):</label>
+            <input 
+              type="number" 
+              step="0.1"
+              [(ngModel)]="sanPhamCapNhat.weight_per_unit"
+              name="weight_per_unit"
+              (ngModelChange)="onWeightPerUnitChange($event)" 
+              readonly
+            />
+
+            <!-- Nút lưu ngay bên trong khung -->
+            <div class="form-buttons" style="grid-column: span 2; text-align: right;">
+              <button 
+                *ngIf="hienNutLuuWeight" 
+                type="button" 
+                class="btn-luu" 
+                (click)="moPopupChonLocation()">
+                Phân bổ lại
+              </button>
+            </div>
+
+
+
+            <!-- Giá mỗi đơn vị -->
+            <label>Giá mỗi đơn vị (VNĐ):</label>
+            <input 
+              type="number" 
+              step="1000"
+              [(ngModel)]="sanPhamCapNhat.unit_price"
+              name="gia"
+            />
+
+            <!-- Ngày sản xuất -->
+            <label>Ngày sản xuất:</label>
+            <input type="date" [(ngModel)]="sanPhamCapNhat.manufacture_date" name="nsx" />
+
+            <!-- Hạn sử dụng -->
+            <label>Hạn sử dụng:</label>
+            <input type="date" [(ngModel)]="sanPhamCapNhat.expiry_date" name="hsd" />
+          </div>
+        </fieldset>
+
+
+        <!-- 🔹 BẢNG CÁC VỊ TRÍ LƯU (PALLET) -->
+        <fieldset class="section mt-4">
+          <legend> Vị trí lưu trữ theo khu vực</legend>
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Vị trí</th>
+                <th>Khu vực</th>
+                <th>Số lượng</th>
+                <th>Chỉnh sửa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let dong of danhSachChiTietTheoMa">
+                <td>{{ dong.location }}</td>
+                <td>{{ dong.ten_khu_vuc }}</td>
+                <td>
+                  <input 
+                    type="number" 
+                    [ngModel]="dong.quantity || 0" 
+                    (ngModelChange)="dong.quantity = $event || 0; capNhatTongKhoiLuong()" 
+                    name="quantity_{{dong.id}}" />
+                </td>
+                <td>
+                  <button class="btn-luu" (click)="capNhatSoLuongTheoDong(dong)">Lưu</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- 🔁 Hiển thị khối lượng và diện tích tính tự động -->
+          <div class="mt-3">
+            <strong> Tổng khối lượng:</strong> {{ sanPhamCapNhat.weight | number:'1.1-1' }} kg &nbsp; |
+            <strong> Tổng diện tích:</strong> {{ sanPhamCapNhat.area | number:'1.1-1' }} m²
+          </div>
+        </fieldset>
+
+
+
+        <!-- 🔹 ẢNH SẢN PHẨM & NCC -->
+        <fieldset class="section">
+          <legend> Hình ảnh & Nhà cung cấp</legend>
+          <div class="form-grid">
+            <label>Ảnh sản phẩm:</label>
+            <input type="file" (change)="chonFileAnhCapNhat($event)" />
+            <img *ngIf="previewAnh" [src]="previewAnh" width="120" style="border: 1px solid #ccc; border-radius: 8px;" />
+
+            <label>Tên nhà cung cấp:</label>
+            <input [(ngModel)]="sanPhamCapNhat.supplier_name" name="ncc" />
+
+            <label>Logo NCC:</label>
+            <input type="file" (change)="chonFileLogoCapNhat($event)" />
+            <img *ngIf="previewLogo" [src]="previewLogo" width="120" style="border: 1px solid #ccc; border-radius: 8px;" />
+          </div>
+        </fieldset>
+
+        
+        <!-- 🔹 NÚT LƯU -->
+        <div class="text-end mt-3">
+          <button type="button" class="btn-luu" (click)="capNhatSanPham(true)">
+            Hoàn tất cập nhật
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Popup chọn location -->
+    <div class="popup-overlay" *ngIf="hienPopupChonLocation" (click)="dongPopupChonLocation()"></div>
+    <div class="popup" *ngIf="hienPopupChonLocation">
+      <h3>Chọn vị trí trong khu vực {{ sanPhamCapNhat.ten_khu_vuc }}</h3>
+      <button class="close-btn" (click)="dongPopupChonLocation()">✖</button>
+
+      <!-- ✅ Hiển thị số đã phân bổ -->
+      <div style="margin-bottom: 12px;">
+        <h4><strong>Đã phân bổ:</strong></h4>
+        - Số lượng: {{ getSoLuongDaThem() }} / {{ sanPhamCapNhat.quantity }} thùng<br>
+        - Khối lượng: {{ getKhoiLuongDaThem().toFixed(2) }} / {{ sanPhamCapNhat.weight }} kg
+
+        <!-- ✅ Nhóm nút điều khiển -->
+        <div class="map-action-buttons" style="margin-top:8px;">
+          <button (click)="tuDongThemHetVaoPallet()" class="btn-blue">
+            Tự động thêm hết vào pallet
+          </button>
+          &nbsp;
+          <button (click)="thuHoiTatCaPallet()" class="btn-red">
+            Thu hồi toàn bộ
+          </button>
+        </div>
+      </div>
+
+
+      <div class="location-grid-map">
+        <div *ngFor="let row of locationGrid" class="location-row">
+          <div *ngFor="let loc of row" 
+              class="location-box"
+              [title]="'KL: ' + (loc.weightUsed + loc.tempWeight) + 'kg / 500kg'"
+              [ngClass]="{
+                'location-empty': loc.weightUsed + loc.tempWeight === 0,
+                'location-used': loc.weightUsed + loc.tempWeight > 0 && loc.weightUsed + loc.tempWeight < 500 && loc.tempWeight === 0,
+                'location-full': loc.weightUsed + loc.tempWeight >= 500 && loc.tempWeight === 0,
+                'location-selected': loc.tempWeight > 0
+              }"
+              (click)="chonLocation(loc)">
+            <div class="location-content">
+              <span *ngIf="(loc.weightUsed + loc.tempWeight) === 0">＋</span>
+              <span *ngIf="(loc.weightUsed + loc.tempWeight) > 0">{{ loc.weightUsed + loc.tempWeight }} kg</span>
+            </div>
+            <div class="location-label">{{ loc.name }}</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="text-end mt-3">
+        <button class="btn-luu" (click)="xacNhanCapNhatWeight()">Xác nhận</button>
+        <button class="btn-huy" (click)="dongPopupChonLocation()">Hủy</button>
+      </div>
+    </div>
+
+</div>

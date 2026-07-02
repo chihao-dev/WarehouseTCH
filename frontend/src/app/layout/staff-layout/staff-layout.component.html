@@ -1,0 +1,102 @@
+  
+<div class="wrapper">  
+  <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">           
+          <div class="logo-header" data-background-color="dark">
+            <!-- Logo Header -->
+            <a href="/staff/thongtin" class="logo">
+              <img src="../../../assets/img/logogpt.png" alt="navbar brand" class="navbar-brand" width="100%" height="50px">
+            </a>
+            <!-- End Logo Header -->
+
+            <!-- Để làm chỗ đăng nhập thành công hiện tên -->
+            <div class="user-greeting dropdown" *ngIf="isLoggedIn">
+              <a href="#">
+                👋 Xin chào, {{ userName }}
+              </a>
+            </div>
+            <!-- Để làm chỗ đăng nhập hiện tên -->
+          </div>
+        </div>
+
+        <div class="scroll-wrapper sidebar-wrapper scrollbar scrollbar-inner" style="position: relative;"><div class="sidebar-wrapper scrollbar scrollbar-inner scroll-content" style="height: 731.2px; margin-bottom: 0px; margin-right: 0px; max-height: none;">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <!-- Nút thống kê dữ liệu kho -->
+              <li class="nav-item">
+                <a href="/staff/thongtin" class="nav-link">
+                  <p>Thông tin nhân viên</p>
+                </a>
+              </li>
+
+              <!-- chữ chức năng của vai trò -->
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                </span>
+                <h4 class="text-section">Chức năng của vai trò</h4>
+              </li>
+
+              <!-- danh sách sản phẩm-->
+              <li class="nav-item">
+                <a href="/staff/thongtin" class="nav-link">
+                  <p>Danh sách sản phẩm</p>
+                </a>
+              </li>
+
+              <!-- Nút tạo phiếu nhập-->
+              <li class="nav-item">
+                <a href="/staff/taophieunhap" class="nav-link">
+                  <p>Tạo phiếu nhập</p>
+                </a>
+              </li>
+
+              <!-- Nút tạo phiếu xuất -->
+              <li class="nav-item">
+                <a href="/staff/thongtin" class="nav-link">
+                  <p>Tạo phiếu xuất</p>
+                </a>
+              </li>
+
+              <!-- Báo cáo hàng tồn-->
+              <li class="nav-item">
+                <a href="/staff/thongtin" class="nav-link">
+                  <p>Báo cáo hàng tồn</p>
+                </a>
+              </li>
+
+               <!-- Đăng xuất -->
+              <li class="nav-item" *ngIf="isLoggedIn">
+                <a href="#" class="nav-link text-danger" (click)="logout()">
+                  <p>Đăng xuất</p>
+                </a>
+              </li>
+
+            
+            </ul>
+          </div>
+        </div>
+
+        <div class="scroll-element scroll-x">
+          <div class="scroll-element_outer">
+            <div class="scroll-element_size"></div>
+            <div class="scroll-element_track"></div>
+            <div class="scroll-bar" style="width: 0px;"></div>
+        </div>
+        </div>
+
+        <div class="scroll-element scroll-y">
+          <div class="scroll-element_outer">
+            <div class="scroll-element_size"></div>
+            <div class="scroll-element_track"></div>
+          <div class="scroll-bar" style="height: 0px;"></div>
+        </div>
+        </div>
+    </div>
+  </div>
+
+  <router-outlet></router-outlet> <!-- 👈 PHẢI CÓ -->
+
+  <br>
+
+</div>
+

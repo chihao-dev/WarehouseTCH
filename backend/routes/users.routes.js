@@ -1,0 +1,12 @@
+const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/users.controller');
+const upload = require('../config/multer');
+router.get('/api/users', controller.get__api_users);
+router.post('/api/users', controller.post__api_users);
+router.delete('/api/users/:id', controller.delete__api_users_id);
+router.get('/api/users/:id', controller.get__api_users_id);
+router.put('/api/users/:id/status', controller.put__api_users_id_status);
+router.get('/api/user-info/:id', controller.get__api_user_info_id);
+router.post('/api/user-info', upload.single('avatar'), controller.post__api_user_info);
+module.exports = router;

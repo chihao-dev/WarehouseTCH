@@ -1,0 +1,123 @@
+/* ===== Footer Tổng thể ===== */
+.footer-custom {
+  background: linear-gradient(135deg, #0b1f3a, #112a46);
+  color: #e4e4e4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
+  padding: 10%;
+}
+
+/* ===== Tiêu đề và mô tả ===== */
+.footer-custom h3,
+.footer-custom h5 {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.footer-custom p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 15px;
+}
+
+/* ===== Liên kết ===== */
+.footer-custom .footer-link {
+  display: inline-block;
+  color: #cfd8dc;
+  text-decoration: none;
+  margin-bottom: 8px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.footer-custom .footer-link::before {
+  content: '';
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -3px;
+  left: 0;
+  background-color: #00c9a7;
+  transition: width 0.3s ease;
+}
+
+.footer-custom .footer-link:hover {
+  color: #00c9a7;
+  transform: translateX(4px);
+}
+
+.footer-custom .footer-link:hover::before {
+  width: 100%;
+}
+
+/* ===== Icon mạng xã hội ===== */
+.footer-custom .social-icon {
+  display: inline-block;
+  color: #cfd8dc;
+  font-size: 20px;
+  margin-right: 12px;
+  transition: color 0.3s, transform 0.3s;
+}
+
+.footer-custom .social-icon:hover {
+  color: #00c9a7;
+  transform: scale(1.2);
+}
+
+/* ===== Icon liên hệ ===== */
+.footer-custom ul li i {
+  color: #00c9a7;
+  margin-right: 8px;
+}
+
+/* ===== Đường kẻ chia ===== */
+.footer-custom .footer-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== Bản quyền ===== */
+.footer-custom .text-light-50 {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-custom .footer-designer {
+  color: #00c9a7;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.footer-custom .footer-designer:hover {
+  text-decoration: underline;
+}
+
+.text-light-50 {
+  text-align: left!important;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 767px) {
+  .footer-custom h3, .footer-custom h5 {
+    text-align: center;
+  }
+  .footer-custom ul {
+    text-align: center;
+    padding-left: 0;
+  }
+  .footer-custom .social-icon {
+    margin: 0 10px;
+  }
+}
+
+
+.social-icon:hover {
+  color: #00c9a7;
+  transform: scale(1.1);
+}
+
+.text-secondary {
+  color: white!important;
+}

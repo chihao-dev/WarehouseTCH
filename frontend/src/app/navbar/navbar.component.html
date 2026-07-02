@@ -1,0 +1,64 @@
+<!-- ***** Header Area Start ***** --> 
+<header class="header-area header-sticky wow slideInDown" data-wow-duration="0.75s" data-wow-delay="0s">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <nav class="main-nav">
+          <!-- ***** Logo Start ***** -->
+          <a href="index.html" class="logo">
+            <img src="../../assets/img/logogpt.png" alt="Logo Kho Hàng" style="height: 75px; width: 100%;">
+          </a>
+          <!-- ***** Logo End ***** -->
+
+
+          <!-- ***** Menu Start ***** -->
+          <ul class="nav"> 
+            <li class="scroll-to-section"><a href="/home">Trang Chủ</a></li>
+            <li class="scroll-to-section"><a href="/introduce">Thông tin kho</a></li>
+            <li class="scroll-to-section"><a href="/products">Sản phẩm trong kho</a></li>
+            <li class="scroll-to-section"><a href="/service">Dịch Vụ</a></li>
+
+            <!-- Nếu chưa đăng nhập -->
+            <li class="scroll-to-section" *ngIf="!isLoggedIn">  
+              <div class="main-blue-button">
+                <a href="/login">Đăng ký / Đăng nhập</a>
+              </div>
+            </li>
+
+            <!-- Nếu đã đăng nhập -->
+            <li class="nav-item dropdown" *ngIf="isLoggedIn">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                👋 Hello, {{ userName }}
+                <span *ngIf="soHoaDon > 0" class="dot-alert"></span>
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" href="/profile">Trang cá nhân</a></li>
+                <li><a class="dropdown-item" href="/goods_receipt">Tạo phiếu nhập</a></li>
+                <li><a class="dropdown-item" href="/goods_issue">Tạo phiếu xuất</a></li>
+                <li> 
+                  <a class="dropdown-item d-flex justify-content-between align-items-center" href="/invoice">
+                    Tổng hợp hóa đơn
+                    <span class="badge" *ngIf="soHoaDon > 0">{{ soHoaDon }}</span>
+                  </a>
+                </li>
+                <li class="position-relative">
+                  <a class="dropdown-item position-relative" href="/inventory">
+                    Kiểm kê hàng hóa
+                    <span *ngIf="canhBaoKiemKe" class="kiemke-badge">!</span>
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" (click)="logout()">Đăng xuất</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- ***** Header Area End ***** -->
+
+<!-- Link Font Awesome cho icon tờ giấy -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">

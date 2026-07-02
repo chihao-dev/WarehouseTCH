@@ -1,0 +1,266 @@
+/* Toàn bộ nền */
+body {
+  background-color: beige;
+  font-family: 'Segoe UI', sans-serif;
+  padding: 40px 0;
+}
+
+/* Container chính */
+.profile-container {
+  background: linear-gradient(to bottom right, #fff, #f9f9f9);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.7s ease;
+  margin-top: 10%;
+}
+
+/* Tiêu đề */
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 25px;
+  position: relative;
+}
+
+.title::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 4px;
+  background: #ff7f50;
+  bottom: -8px;
+  left: 0;
+  border-radius: 2px;
+}
+
+/* Thẻ thông tin cá nhân */
+.profile-card {
+  display: flex;
+  flex-direction: row;
+  border-radius: 15px;
+  background: white;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.profile-card:hover {
+  transform: scale(1.02);
+}
+
+/* Bên trái (Avatar + nút) */
+.profile-left {
+  flex: 0 0 200px;
+  text-align: center;
+  background: #f0f0f0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.avatar-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  object-fit: cover;
+  margin: auto;
+  transition: transform 0.3s ease;
+}
+
+.avatar-img:hover {
+  transform: rotate(2deg) scale(1.03);
+}
+
+/* Nút cập nhật */
+.btn-update {
+  background: linear-gradient(135deg, #ff7f50, #ff6347);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-weight: 600;
+  transition: background 0.3s;
+}
+
+.btn-update:hover {
+  background: linear-gradient(135deg, #ff4500, #e63946);
+}
+
+/* Bên phải (Chi tiết) */
+.profile-right {
+  flex: 1;
+  padding: 25px;
+  background: #ffffff;
+}
+
+.profile-right p {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.profile-right strong {
+  color: #555;
+}
+
+/* Form cập nhật */
+.form-card {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.5s ease;
+}
+
+.form-card h5 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #444;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-control {
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 10px 15px;
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  border-color: #ff7f50;
+  box-shadow: 0 0 0 3px rgba(255, 127, 80, 0.2);
+  outline: none;
+}
+
+button[type="submit"] {
+  background-color: #ff7f50;
+  border: none;
+  border-radius: 25px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background-color: #ff4500;
+  box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: scaleY(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* Neon title */
+.neon-text {
+  font-size: 28px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 0 5px #00e6e6, 0 0 10px #00b3b3, 0 0 20px #00cccc;
+  margin-bottom: 25px;
+}
+
+/* Card kiểu glassmorphism */
+.profile-glass {
+  display: flex;
+  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+.profile-glass:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+/* Bên trái */
+.profile-left {
+  flex: 0 0 220px;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Avatar fancy */
+.fancy-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 4px solid #00e6e6;
+  box-shadow: 0 0 20px rgba(0, 230, 230, 0.7);
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.fancy-avatar:hover {
+  transform: rotateY(360deg) scale(1.05);
+}
+
+/* Nút cập nhật */
+.btn-update {
+  background: linear-gradient(135deg, #00e6e6, #00b3b3);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+}
+
+.btn-update:hover {
+  background: linear-gradient(135deg, #00cccc, #007777);
+  box-shadow: 0 0 10px #00e6e6;
+}
+
+/* Bên phải */
+.profile-right {
+  flex: 1;
+  padding-left: 30px;
+  color: #fff;
+}
+
+.profile-right p {
+  font-size: 16px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+  padding-bottom: 6px;
+  transition: all 0.3s;
+}
+
+.profile-right p:hover {
+  transform: translateX(5px);
+  color: #00ffff;
+}
+

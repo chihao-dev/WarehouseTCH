@@ -1,0 +1,201 @@
+/* Header Styles */
+.header-area {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999;
+  background-color: #1ba7a7;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.header-sticky {
+  top: 0;
+  animation: slideInDown 0.75s ease-in-out;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav li {
+  position: relative;
+}
+
+.nav a {
+  text-decoration: none;
+  font-weight: 500;
+  color: #ffffff;
+  padding: 10px 5px 10px 10px ;
+  border-radius: 12px;
+  transition: all 0.3s ease-in-out;
+  margin-left: 5px ;
+}
+
+.nav a:hover,
+.nav a.active {
+  background: linear-gradient(145deg, #6c63ff, #4a47e5);
+  color: #fff;
+  box-shadow: 0px 5px 15px rgba(108, 99, 255, 0.4);
+}
+
+.main-blue-button a {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff !important;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 600;
+  box-shadow: 0px 8px 20px rgba(118, 75, 162, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+.main-blue-button a:hover {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.menu-trigger {
+  display: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 18px;
+}
+
+.menu-trigger span {
+  display: block;
+  background: #fff;
+  width: 30px;
+  height: 3px;
+  margin: 6px 0;
+  border-radius: 2px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .main-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav {
+    flex-direction: column;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 12px;
+    padding: 15px;
+    display: none;
+  }
+
+  .nav.show {
+    display: flex;
+  }
+
+  .menu-trigger {
+    display: block;
+  }
+}
+
+/* Slide In Down animation */
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
+
+/*đăng nhập thành công có tên*/
+.nav-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dropdown-menu {
+  background-color: rgb(12, 91, 127);
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  min-width: 160px;
+  font-family: 'Segoe UI', sans-serif;
+  z-index: 1000;
+}
+
+/* Từng mục trong dropdown */
+.dropdown-item {
+  padding: 10px 20px;
+  color: #333;
+  text-decoration: none;
+  display: block;
+  font-size: 15px;
+  transition: background-color 0.3s, color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+  color: #000;
+  cursor: pointer;
+}
+
+/* Divider (kẻ ngang) */
+.dropdown-divider {
+  margin: 0.5rem 0;
+  border-top: 1px solid #eee;
+}
+
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -15px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+  font-weight: bold;
+  z-index: 10;
+}
+
+.kiemke-badge {
+  position: absolute;
+  top: 2px;        /* Sát lên trên hơn */
+  right: -2px;     /* Đẩy qua phải hơn tí nữa */
+  width: 16px;
+  height: 16px;
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}

@@ -1,0 +1,52 @@
+table th, table td {
+  vertical-align: middle !important;
+}
+
+h3 {
+  font-weight: bold;
+}
+
+h6 {
+  font-weight: 600;
+}
+
+.table-sm th, .table-sm td {
+  padding: 0.5rem;
+}
+
+table img {
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.form-label {
+  font-weight: 500;
+  color: #333;
+}
+
+input.form-control::placeholder {
+  font-style: italic;
+  color: #999;
+}
+
+.nen-th th {
+  background-color: rgb(28, 164, 160);
+  color: white;
+}
+
+table {
+  width: 100%;
+  table-layout: auto !important; /* Cho phép tự giãn */
+}
+
+th, td {
+  white-space: nowrap; /* Không xuống dòng nếu chữ dài */
+  padding: 6px 10px;
+  text-align: center; /* Giữ chữ ở giữa nếu muốn */
+}
+
+th {
+  font-weight: 600;
+}
+

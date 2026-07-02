@@ -1,0 +1,155 @@
+<body style="background-color: beige;">
+  <div class="container mt-4">
+    <h2 class="mb-3">
+      📋 Kiểm kê hàng hóa
+    </h2>
+
+    <div class="alert alert-secondary">
+      <h4><strong>📌 Mã đợt:&nbsp;</strong> <span class="text-danger">{{ maDot || '...' }}</span> &nbsp; | &nbsp;
+      <strong>📝 Tên đợt:&nbsp;</strong> <span class="text-primary">{{ tenDot || '...' }}</span> &nbsp; | &nbsp;
+      <strong>📅 Ngày tạo:&nbsp;</strong> <span class="text-success">{{ ngayTaoDot || '...' }}</span></h4>
+    </div>
+
+    <!-- Bộ lọc -->
+    <div class="row mb-3">
+      <div class="col-md-2">
+        <input type="text" class="form-control" placeholder="🔍 Mã SP" [(ngModel)]="filter.ma" (input)="locDanhSach()" />
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="🔍 Tên SP" [(ngModel)]="filter.ten" (input)="locDanhSach()" />
+      </div>
+      <div class="col-md-2">
+        <select class="form-control" [(ngModel)]="filter.khuVuc" (change)="locDanhSach()">
+          <option value="">📍 Tất cả khu vực</option>
+          <option *ngFor="let kv of danhSachKhuVuc" [value]="kv">{{ kv }}</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-control" [(ngModel)]="filter.tinhTrang" (change)="locDanhSach()">
+          <option value="">📊 Tình trạng</option>
+          <option value="du">🟢 Đủ</option>
+          <option value="thieu">🔴 Thiếu</option>
+          <option value="du_thua">🟡 Dư</option>
+          <option value="chua_kiem">⏳ Chưa kiểm</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="👤 Email kiểm kê" [(ngModel)]="filter.email" (input)="locDanhSach()" />
+      </div>
+    </div>
+
+
+
+    <div *ngIf="danhSachCanDem.length === 0 && dotId !== 0" class="alert alert-info text-center">
+      Không có sản phẩm nào được gán cho đợt kiểm kê này hoặc đã hoàn tất.
+    </div>
+    <div *ngIf="dotId === 0" class="alert alert-danger text-center">
+        Chưa có đợt kiểm kê nào được tạo hoặc đã hoàn tất.
+    </div>
+
+    <table class="table table-bordered table-hover" *ngIf="danhSachCanDem.length > 0">
+      <thead class="table-light">
+        <tr>
+          <th class="th-auto-width">Hình</th>
+          <th class="th-auto-width">Mã sản phẩm</th>
+          <th class="th-auto-width">Tên sản phẩm</th>
+          <th class="th-auto-width">Khu vực</th>
+          <th class="th-auto-width">Tồn kho</th>
+          <th class="th-auto-width">Thực tế</th>
+          <th class="th-auto-width">Tình trạng</th>
+          <th class="th-auto-width">Ghi chú</th>
+          <th class="th-auto-width">Nhân viên</th>
+          <th class="th-auto-width">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let sp of danhSachCanDem">
+          <tr (click)="moPopupChiTiet(sp)" style="cursor: pointer;">
+            <td><img [src]="sp.image_url" width="50" /></td>
+            <td>{{ sp.product_code }}</td>
+            <td>{{ sp.product_name }}</td>
+            <td>{{ sp.ten_khu_vuc }}</td>
+            <td><strong>{{ sp.system_quantity }}</strong></td>
+            <td (click)="$event.stopPropagation()">
+              <input
+                type="number"
+                [(ngModel)]="sp.actual_quantity"
+                (ngModelChange)="onChangeSoLuong(sp)"
+                class="form-control form-control-sm"
+                [disabled]="sp.checked_by_email && sp.checked_by_email !== email"
+              />
+            </td>
+            <td [ngClass]="getClassTinhTrang(sp)">
+              {{ tinhTrang(sp) }}
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <input
+                type="text"
+                [(ngModel)]="sp.ghi_chu"
+                class="form-control form-control-sm"
+                [readonly]="!sp.actual_quantity"
+                (ngModelChange)="onChangeSoLuong(sp)"
+                placeholder="Ghi chú"
+              />
+            </td>
+            <td>
+              <!-- Ưu tiên hiển thị email tạm nếu actual_quantity vừa thay đổi -->
+              <span *ngIf="sp.temp_email" class="text-muted">
+                {{ sp.temp_email }} (chưa lưu)
+              </span>
+
+              <!-- Chỉ hiển thị email đã lưu nếu không có temp_email -->
+              <span *ngIf="!sp.temp_email && sp.checked_by_email" class="text-success">
+                {{ sp.checked_by_email }}
+              </span>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <button class="btn btn-sm"
+                      [disabled]="sp.checked_by_email && sp.checked_by_email !== email"
+                      [ngClass]="{
+                        'btn-secondary': sp.checked_by_email && sp.checked_by_email !== email,
+                        'btn-warning': sp.checked_by_email && sp.checked_by_email === email,
+                        'btn-success': !sp.checked_by_email
+                      }"
+                      (click)="xacNhanMotSanPham(sp)">
+                {{ sp.checked_by_email ? 'Cập nhật' : 'Hoàn tất' }}
+              </button>
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+    
+  </div>
+
+  <div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': popupChiTiet }" style="background-color: rgba(0,0,0,0.3);">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">📦 Thông tin chi tiết: {{ sanPhamDangXem?.product_code }}</h5>
+          <button type="button" class="btn-close" (click)="popupChiTiet = false"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img [src]="sanPhamDangXem?.image_url" class="img-fluid rounded" style="max-height: 150px;" />
+            </div>
+            <div class="col-md-8">
+              <p><strong>Tên sản phẩm:</strong> {{ sanPhamDangXem?.product_name }}</p>
+              <p><strong>Khu vực:</strong> {{ sanPhamDangXem?.ten_khu_vuc }}</p>
+              <p><strong>Số lượng hệ thống:</strong> {{ sanPhamDangXem?.system_quantity }}</p>
+            </div>
+          </div>
+          <hr />
+          <h6>📍 Các pallet chứa mã này (tại thời điểm Admin gán đợt):</h6>
+          <ul *ngIf="sanPhamDangXem?.pallets?.length > 0">
+            <li *ngFor="let p of sanPhamDangXem.pallets">
+              {{ p.location }} – SL: {{ p.quantity }}
+            </li>
+          </ul>
+          <div *ngIf="!sanPhamDangXem?.pallets?.length" class="text-muted">❌ Không tìm thấy pallet chứa sản phẩm.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

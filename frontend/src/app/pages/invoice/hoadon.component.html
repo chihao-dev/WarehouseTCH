@@ -1,0 +1,697 @@
+
+<body style="background-color: beige;">
+
+  <div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="main-banner wow fadeIn" id="top">
+            <div class="container">
+              <div class="row">
+                <div class="col-lg-12">
+                  
+                <div class="invoice-container">
+                  <div class="filter-section">
+                    <!-- Hàng trên: 3 bộ lọc chính -->
+                    <div class="filter-row">
+                      <label>Mã phiếu:
+                        <input [(ngModel)]="filter.keyword" (input)="locHoaDon()" />
+                      </label>
+                      <label>Loại phiếu:
+                        <select [(ngModel)]="filter.loai" (change)="locHoaDon()">
+                          <option value="">Tất cả</option>
+                          <option value="Phiếu nhập kho">Phiếu nhập kho</option>
+                          <option value="Phiếu xuất kho">Phiếu xuất kho</option>
+                        </select>
+                      </label>
+                      <label>Trạng thái:
+                        <select [(ngModel)]="filter.trangThai" (change)="locHoaDon()">
+                          <option value="">Tất cả</option>
+                          <option value="Đã gửi phiếu">Đã gửi phiếu</option>
+                          <option value="Đã duyệt">Đã duyệt</option>
+                          <option value="Đã hủy">Đã hủy</option>
+                          <option value="Đã nhập hàng vào kho">Đã nhập hàng vào kho</option>
+                          <option value="Đã xuất hàng khỏi kho">Đã xuất hàng khỏi kho</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <!-- Hàng dưới: Ngày tạo + Tổng tiền -->
+                    <div class="filter-row">
+                      <label>📅 Ngày tạo từ:
+                        <input type="date" [(ngModel)]="filter.ngayBatDau" (change)="locHoaDon()" />
+                      </label>
+                      <label>đến:
+                        <input type="date" [(ngModel)]="filter.ngayKetThuc" (change)="locHoaDon()" />
+                      </label>
+                      <label>💰 Tổng tiền từ:
+                        <input type="number" [(ngModel)]="filter.tongTienMin" (input)="locHoaDon()" />
+                      </label>
+                      <label>đến:
+                        <input type="number" [(ngModel)]="filter.tongTienMax" (input)="locHoaDon()" />
+                      </label>
+                    </div>
+                  </div>
+
+                  <br>
+
+                  <h2>📑 Hóa đơn tổng hợp</h2>
+                  <table class="invoice-table">
+                    <thead>
+                      <tr>
+                        <th>Loại phiếu</th>
+                        <th>Mã phiếu</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Chi tiết</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container *ngFor="let hd of filteredHoaDonList">
+                        <!-- Dòng hóa đơn -->
+                        <tr>
+                          <td>{{ hd.loai }}</td>
+                          <td>{{ hd.receipt_code }}</td>
+                          <td>{{ hd.created_date | date:'dd/MM/yyyy' }}</td>
+                          <td>{{ hd.total_amount | number:'1.0-0' }} VNĐ</td>
+                          <td>
+                            <span [ngClass]="{
+                              'status-duyet': hd.trang_thai === 'Đã duyệt',
+                              'status-hoanthanh': hd.trang_thai === 'Đã nhập hàng vào kho' || hd.trang_thai === 'Đã xuất hàng khỏi kho',
+                              'status-huy': hd.trang_thai === 'Đã hủy'
+                            }">
+                              {{ hd.trang_thai }}
+                            </span>
+                          </td>
+                          <div class="btn-wrapper">
+                              <button class="btn-view" (click)="xemChiTietHoaDon(hd)">
+                                🔍 Xem
+                              </button>
+                              <span 
+                                *ngIf="hd.trang_thai === 'Đã duyệt' && !hd.daXuatHoaDon" 
+                                class="badge-corner">!</span>
+                            </div>
+                        </tr>
+
+                        <!-- Dòng chi tiết ngay dưới -->
+                        <tr *ngIf="selectedHoaDon?.receipt_code === hd.receipt_code">
+                          <td colspan="6">
+                            <div class="detail-container">
+
+<!---------------------------- Chi tiết PHIẾU NHẬP ---------------------------->
+                              <ng-container *ngIf="hd.loai === 'Phiếu nhập kho'; else chiTietXuat">
+                                
+                              <button class="btn-close-top" (click)="dongChiTiet()">✖</button>
+                              <div id="hoa-don-xuat-pdf">
+                              <h3>📋 Mã đơn nhập kho: {{ selectedHoaDon.receipt_code }}</h3>
+
+                              <h3>PHIẾU NHẬP KHO - WAREHOUSE MANAGER T&H</h3>
+
+                              <!-- 🔵 Thanh trạng thái kiểu chấm tròn hiện đại -->
+                              <!-- Nếu trạng thái không phải Đã hủy thì hiển thị timeline 3 bước bình thường -->
+                              <div class="timeline-container" *ngIf="selectedHoaDon.trang_thai !== 'Đã hủy'">
+                                <div class="timeline">
+                                  <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã gửi phiếu')">
+                                    <div class="circle">1</div>
+                                    <span>Đã gửi phiếu</span>
+                                  </div>
+                                  <div class="line"></div>
+                                  <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã duyệt')">
+                                    <div class="circle">2</div>
+                                    <span>Đã duyệt</span>
+                                  </div>
+                                  <div class="line"></div>
+                                  <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã nhập hàng vào kho')">
+                                    <div class="circle">3</div>
+                                    <span>Đã nhập hàng vào kho</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Nếu trạng thái là Đã hủy thì hiển thị 1 chấm đỏ có dấu X -->
+                              <div class="timeline-container" *ngIf="selectedHoaDon.trang_thai === 'Đã hủy'">
+                                <div class="timeline">
+                                  <div class="step">
+                                    <div class="circle-huy"></div>
+                                    <span>Đã hủy</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Thời gian & NCC -->
+                              <div class="info-row">
+                                <div class="info-section">
+                                  <h5>Thời gian</h5>
+                                  <p><strong> Ngày tạo:</strong> {{ selectedHoaDon.created_date | date:'dd/MM/yyyy' }}</p>
+                                  <p><strong> Ngày hẹn:</strong> {{ selectedHoaDon.meeting_date | date:'dd/MM/yyyy' }}</p>
+                                </div>
+                                <div class="info-section">
+                                  <h5> Nhà cung cấp</h5>
+                                  <p><strong> Logo:</strong></p>
+                                  <img [src]="selectedHoaDon.logo_url" height="40" *ngIf="selectedHoaDon.logo_url" />
+                                  <p><strong>Tên NCC:</strong> {{ selectedHoaDon.supplier_name }}</p>
+                                  <p><strong> Địa chỉ:</strong> {{ selectedHoaDon.supplier_address }}</p>
+                                  <p><strong> Người đại diện:</strong> {{ selectedHoaDon.representative_name  }}</p>
+                                  <p><strong> Email:</strong> {{ selectedHoaDon.representative_name  }}</p>
+                                  <p><strong> Số điện thoại:</strong> {{ selectedHoaDon.representative_phone }}</p>
+                                </div>
+                              </div>
+
+                              <!-- Quản lý & Ghi chú -->
+                              <div class="info-row">
+                                <div class="info-section">
+                                  <h5> Nhân viên tạo , duyệt đơn</h5>
+                                  <p><strong> Nhân viên tạo đơn:</strong> {{ selectedHoaDon.staff_account_name || 'Chưa có' }}</p>
+                                  <p><strong> Email:</strong> {{ selectedHoaDon.staff_account_email || 'Chưa có' }}</p>
+                                  <p><strong> Quản lý kho duyệt đơn:</strong> {{ selectedHoaDon.admin_account_name || 'Chưa có' }}</p>
+                                  <p><strong> Email:</strong> {{ selectedHoaDon.admin_account_email || 'Chưa có' }}</p>
+                                </div>
+                                <div class="info-section">
+                                  <h5> Ghi chú & Phản hồi</h5>
+                                  <p><strong> Ghi chú của bạn:</strong> {{ selectedHoaDon.note }}</p>
+                                  <p><strong> Phản hồi của quản lý:</strong> {{ selectedHoaDon.note_admin }}</p>
+                                </div>
+                              </div>
+
+                              <!-- Danh sách sản phẩm -->
+                              <h4> Danh sách sản phẩm</h4>
+                              <table class="detail-table">
+                                <thead>
+                                  <tr>
+                                    <th>STT</th>
+                                    <th>Hình ảnh</th>
+                                    <th>Mã SP</th>
+                                    <th>Tên sản phẩm</th>
+                                    <th>Loại</th>
+                                    <th>Đơn vị</th>
+                                    <th>Khối lượng</th>
+                                    <th>Diện tích</th>
+                                    <th>NSX</th>
+                                    <th>HSD</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr *ngFor="let sp of selectedHoaDon.products; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td><img [src]="sp.image_url" height="40" /></td>
+                                    <td>
+                                      <svg [id]="'barcode-' + sp.product_code"></svg>
+                                      <div style="font-size: 12px; margin-top: 2px;">{{ sp.product_code }}</div>
+                                    </td>
+                                    <td>{{ sp.product_name }}</td>
+                                    <td>{{ sp.product_type }}</td>
+                                    <td>{{ sp.unit }}</td>
+                                    <td>{{ sp.weight }} kg</td>
+                                    <td>{{ sp.area }} m²</td>
+                                    <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                                    <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+                                    <td>{{ sp.quantity }}</td>
+                                    <td>{{ sp.unit_price | number }}</td>
+                                    <td>{{ sp.total_price | number }}</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+
+                              <div class="total-amount">
+                                <strong> Tổng cộng:</strong> {{ selectedHoaDon.total_amount | number:'1.0-0' }} VNĐ
+                              </div>
+                              </div>
+
+                              <div style="text-align: right; margin-top: 12px;">
+                                <div class="btn-wrapper" style="text-align: right; margin-top: 12px;">
+                                  <button class="btn-export" (click)="xuatHoaDonNhapThongMinh(selectedHoaDon)">
+                                    🧾 Xuất hóa đơn
+                                  </button>
+                                  <span 
+                                    *ngIf="selectedHoaDon.trang_thai === 'Đã duyệt' && !selectedHoaDon.daXuatHoaDon" 
+                                    class="badge-corner">!</span>
+                                </div>
+                                &nbsp;
+                                <button 
+                                  class="btn-update" 
+                                  [disabled]="
+                                    selectedHoaDon.trang_thai === 'Đã duyệt' || 
+                                    selectedHoaDon.trang_thai === 'Đã nhập hàng vào kho' || 
+                                    selectedHoaDon.trang_thai === 'Đã hủy'
+                                  "
+                                  (click)="capNhatPhieuNhap(selectedHoaDon)">
+                                  ✏️ Cập nhật phiếu nhập
+                                </button>
+                              </div>
+                              </ng-container>
+
+<!---------------------------- Chi tiết PHIẾU XUẤT ---------------------------->
+                              <ng-template #chiTietXuat>
+                                <button class="btn-close-top" (click)="dongChiTiet()">✖</button>
+                                <div id="hoa-don-xuat-pdf">
+                                <h3>📋 Mã đơn xuất kho: {{ selectedHoaDon.receipt_code }}</h3>
+
+                                <h3>PHIẾU XUẤT KHO - WAREHOUSE MANAGER T&H</h3>
+
+                                <!-- 🔵 Thanh trạng thái -->
+                                <!-- Nếu trạng thái là Đã hủy thì hiển thị 1 chấm đỏ có dấu X -->
+                                <div class="timeline-container" *ngIf="selectedHoaDon.trang_thai === 'Đã hủy'">
+                                  <div class="timeline">
+                                    <div class="step">
+                                      <div class="circle-huy"></div>
+                                      <span>Đã hủy</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <!-- Nếu trạng thái không phải Đã hủy thì hiển thị timeline 3 bước bình thường -->
+                                <div class="timeline-container" *ngIf="selectedHoaDon.trang_thai !== 'Đã hủy'">
+                                  <div class="timeline">
+                                    <div class="step" [ngClass]="getStepClassXuat(selectedHoaDon.trang_thai, 'Đã gửi phiếu')">
+                                      <div class="circle">1</div>
+                                      <span>Đã gửi phiếu</span>
+                                    </div>
+                                    <div class="line"></div>
+                                    <div class="step" [ngClass]="getStepClassXuat(selectedHoaDon.trang_thai, 'Đã duyệt')">
+                                      <div class="circle">2</div>
+                                      <span>Đã duyệt</span>
+                                    </div>
+                                    <div class="line"></div>
+                                    <div class="step" [ngClass]="getStepClassXuat(selectedHoaDon.trang_thai, 'Đã xuất hàng khỏi kho')">
+                                      <div class="circle">3</div>
+                                      <span>Đã xuất hàng khỏi kho</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+
+                                <!-- Thời gian & NCC -->
+                                <div class="info-row">
+                                  <div class="info-section">
+                                    <h5> Thời gian</h5>
+                                    <p><strong> Ngày tạo:</strong> {{ selectedHoaDon.created_date | date:'dd/MM/yyyy' }}</p>
+                                    <p><strong> Ngày hẹn:</strong> 
+                                      {{ selectedHoaDon.delivery_date ? (selectedHoaDon.delivery_date| date:'dd/MM/yyyy') : 'Chưa có' }}
+                                    </p>
+                                  </div>
+                                  <div class="info-section">
+                                    <h5> Thông tin bên nhận hàng</h5>
+                                    <p><strong> Logo:</strong></p>
+                                    <img [src]="selectedHoaDon.logo_url" height="40" *ngIf="selectedHoaDon.logo_url" />
+                                    <p><strong> Tên doanh nghiệp/trung tâm thương mại, ... :</strong> <br>{{ selectedHoaDon.receiver_name }}</p>
+                                    <p><strong> Địa chỉ doanh nghiệp/trung tâm thương mại, ... :</strong> <br> {{ selectedHoaDon.receiver_address }}</p>
+                                    <p><strong> Họ và tên người nhận:</strong> {{ selectedHoaDon.representative_name }}</p>
+                                    <p><strong> Email:</strong> {{ selectedHoaDon.representative_email }}</p>
+                                    <p><strong> Số điện thoại:</strong> {{ selectedHoaDon.representative_phone}}</p>
+                                  </div>
+                                </div>
+                                
+                                <!-- Quản lý và ghi chú-->
+                                <div class="info-row">
+                                  <div class="info-section">
+                                    <h5> Nhân viên kiểm tra , duyệt đơn</h5>
+                                    <p><strong> Nhân viên:</strong> {{ selectedHoaDon.staff_account_name || 'Chưa có' }}</p>
+                                    <p><strong> Email:</strong> {{ selectedHoaDon.staff_account_email || 'Chưa có' }}</p>
+                                    <p><strong> Quản lý kho:</strong> {{ selectedHoaDon.admin_account_name || 'Chưa có' }}</p>
+                                    <p><strong> Email:</strong> {{ selectedHoaDon.admin_account_email || 'Chưa có' }}</p>
+                                  </div>
+                                  <div class="info-section">
+                                    <h5> Ghi chú & Phản hồi</h5>
+                                    <p><strong> Ghi chú:</strong> {{ selectedHoaDon.note }}</p>
+                                    <p><strong> Phản hồi từ kho:</strong> {{ selectedHoaDon.note_admin }}</p>
+                                  </div>
+                                </div>
+
+                                <!-- Danh sách sản phẩm xuất -->
+                                <h4> Danh sách sản phẩm</h4>
+                                <table class="detail-table">
+                                  <thead>
+                                    <tr>
+                                      <th>STT</th>
+                                      <th>Hình ảnh</th>
+                                      <th>Mã SP</th>
+                                      <th>Tên SP</th>
+                                      <th>Loại</th>
+                                      <th>Đơn vị</th>
+                                      <th>Khối lượng</th>
+                                      <th>NSX</th>
+                                      <th>HSD</th>
+                                      <th>Số lượng</th>
+                                      <th>Đơn giá</th>
+                                      <th>Thành tiền</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr *ngFor="let sp of selectedHoaDon.products; let i = index">
+                                      <td>{{ i + 1 }}</td>
+                                      <td><img [src]="sp.image_url" height="40" /></td>
+                                      <td>
+                                        <svg [id]="'barcode-' + sp.product_code"></svg>
+                                        <div style="font-size: 12px; margin-top: 2px;">{{ sp.product_code }}</div>
+                                      </td>
+                                      <td>{{ sp.product_name }}</td>
+                                      <td>{{ sp.product_type }}</td>
+                                      <td>{{ sp.unit }}</td>
+                                      <td>{{ sp.weight }} kg</td>
+                                      <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                                      <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+                                      <td>{{ sp.quantity }}</td>
+                                      <td>{{ sp.unit_price | number:'1.0-0' }}</td>
+                                      <td>{{ sp.total_price | number:'1.0-0' }}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+
+                                <div class="total-weight">
+                                  <strong>Tổng trọng lượng đơn hàng:</strong> {{ selectedHoaDon.total_weight | number:'1.0-0' }} KG
+                                </div>
+
+                                <!-- Tổng cộng -->
+                                <div class="total-amount">
+                                  <strong>Tổng cộng:</strong> {{ selectedHoaDon.total_amount | number:'1.0-0' }} VNĐ
+                                </div>
+                                </div>
+                                  
+
+                                <br>
+
+
+                                <div style="text-align: right; margin-top: 12px;">
+                                <div class="btn-wrapper" style="text-align: right; margin-top: 12px;">
+                                  <button class="btn-export" (click)="xuatHoaDonXuatThongMinh(selectedHoaDon)">
+                                    🧾 Xuất hóa đơn
+                                  </button>
+                                  <span 
+                                    *ngIf="selectedHoaDon.trang_thai === 'Đã duyệt' && !selectedHoaDon.daXuatHoaDon" 
+                                    class="badge-corner">!</span>
+                                </div>
+                                &nbsp;
+                                <button  
+                                  class="btn-update" 
+                                  [disabled]="
+                                    selectedHoaDon.trang_thai === 'Đã duyệt' || 
+                                    selectedHoaDon.trang_thai === 'Đã xuất hàng khỏi kho' || 
+                                    selectedHoaDon.trang_thai === 'Đã hủy'
+                                  "
+                                  (click)="capNhatPhieuXuat(selectedHoaDon)">
+                                  ✏️ Cập nhật phiếu xuất
+                                </button>
+                              </div>
+
+
+                              </ng-template>
+
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </table>
+                </div>
+
+
+                  <!-- Popup cập nhật -->
+                  <!-- ✅ POPUP CẬP NHẬT PHIẾU NHẬP -->
+                  <div *ngIf="capNhatMo" class="popup-capnhat">
+
+                    <h3>✏️ Cập nhật phiếu nhập: {{ phieuDangCapNhat.receipt_code }}</h3>
+
+                    <!-- 🔵 Thanh trạng thái -->
+                    <!-- 🔵 Thanh trạng thái kiểu chấm tròn hiện đại -->
+                    <div class="timeline-container">
+                      <div class="timeline">
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã gửi phiếu')">
+                          <div class="circle">1</div>
+                          <span>Đã gửi phiếu</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã duyệt')">
+                          <div class="circle">2</div>
+                          <span>Đã duyệt</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã nhập hàng vào kho')">
+                          <div class="circle">3</div>
+                          <span>Đã nhập hàng vào kho</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Thông tin 2 cột -->
+                    <!-- Bố cục mỗi hàng 2 nhóm -->
+                    <div class="info-row">
+                      <div class="info-section">
+                        <h5> Thời gian</h5>
+                        <p><strong> Ngày tạo:</strong> {{ phieuDangCapNhat.created_date | date:'dd/MM/yyyy' }}</p>
+                        <p><strong> Ngày hẹn:</strong> <input type="date" [(ngModel)]="phieuDangCapNhat.meeting_date" /></p>
+                      </div>
+
+                      <div class="info-section">
+                        <h5> Nhà cung cấp</h5>
+                        <p><strong> Logo:</strong></p>
+                        <img [src]="previewLogo || phieuDangCapNhat.logo_url" height="40" *ngIf="phieuDangCapNhat.logo_url || previewLogo" />
+                        <input type="file" (change)="onLogoSelected($event)" />
+                        <p><strong>Tên NCC:</strong> <input [(ngModel)]="phieuDangCapNhat.supplier_name" /></p>
+                        <p><strong> Địa chỉ:</strong> <input [(ngModel)]="phieuDangCapNhat.supplier_address" /></p>
+                        <p><strong> Người đại diện:</strong> <input [(ngModel)]="phieuDangCapNhat.representative_name " /></p>
+                        <p><strong> Email:</strong> <input [(ngModel)]="phieuDangCapNhat.representative_email" /></p>
+                        <p><strong> SĐT:</strong> <input [(ngModel)]="phieuDangCapNhat.representative_phone" /></p>
+                      </div>
+                    </div>
+
+                    <div class="info-row">
+                      <div class="info-section">
+                        <h5> Thông tin nhân viên tạo , duyệt đơn</h5>
+                        <p><strong> Nhân viên tạo đơn:</strong> {{ phieuDangCapNhat.staff_account_name || 'Chưa có' }}</p>
+                        <p><strong> Email:</strong> {{ phieuDangCapNhat.staff_account_email || 'Chưa có' }}</p><br>
+                        <p><strong> Quản lý kho duyệt đơn:</strong> {{ phieuDangCapNhat.admin_account_name || 'Chưa có' }}</p>
+                        <p><strong> Email:</strong> {{ phieuDangCapNhat.admin_account_email || 'Chưa có' }}</p>
+                      </div>
+
+                      <div class="info-section">
+                        <h5> Ghi chú & Phản hồi</h5>
+                        <p><strong> Ghi chú của bạn:</strong> <textarea [(ngModel)]="phieuDangCapNhat.note"></textarea></p>
+                      </div>
+                    </div>
+
+
+                    <!-- Danh sách sản phẩm -->
+                    <h4> Danh sách sản phẩm</h4>
+
+                    <div class="table-scroll-x">
+                      <table class="detail-table">
+                        <thead>
+                          <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Loại</th>
+                            <th>Đơn vị</th>
+                            <th>Khối lượng 1 SP (kg)</th> <!-- ✅ Cột mới -->
+                            <th>Khối lượng lô hàng (kg)</th>
+                            <th>Diện tích lô hàng (m²)</th>
+                            <th>Ngày sản xuất</th>
+                            <th>Hạn sử dụng</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let sp of phieuDangCapNhat.products; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>
+                              <img [src]="sp.preview_image || sp.image_url" height="40" *ngIf="sp.preview_image || sp.image_url" /><br />
+                              <input type="file" (change)="onProductImageSelected($event, sp)" /><br />
+                            </td>
+                            <td><input [(ngModel)]="sp.product_code" /></td>
+                            <td><input [(ngModel)]="sp.product_name" /></td>
+                            <td><input [(ngModel)]="sp.product_type" /></td>
+                            <td><input [(ngModel)]="sp.unit" /></td>
+
+                            <!-- ✅ Khối lượng 1 sản phẩm -->
+                            <td>
+                              <input [(ngModel)]="sp.kg_per_unit" type="number"
+                                    (input)="capNhatKhoiLuongVaDienTich(i)" style="width: 90px;" />
+                            </td>
+
+                            <!-- ✅ Trọng lượng lô hàng (readonly) -->
+                            <td>
+                              <input [(ngModel)]="sp.weight" type="number" readonly style="background-color: #f0f0f0;" />
+                            </td>
+
+                            <!-- ✅ Diện tích (readonly) -->
+                            <td>
+                              <input [(ngModel)]="sp.area" type="number" readonly style="background-color: #f0f0f0;" />
+                            </td>
+
+                            <td><input [(ngModel)]="sp.manufacture_date" type="date" /></td>
+                            <td><input [(ngModel)]="sp.expiry_date" type="date" /></td>
+
+                            <!-- ✅ Khi thay đổi số lượng cũng phải cập nhật trọng lượng + diện tích -->
+                            <td>
+                              <input [(ngModel)]="sp.quantity" type="number"
+                                    (input)="capNhatKhoiLuongVaDienTich(i)" />
+                            </td>
+
+                            <td><input [(ngModel)]="sp.unit_price" type="number" /></td>
+                            <td>{{ sp.quantity * sp.unit_price | number:'1.0-0' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Tổng tiền -->
+                    <!-- Tổng tiền -->
+                    <div class="total-amount">
+                      <strong>💰 Tổng cộng:</strong>
+                      {{ getTongTien(phieuDangCapNhat) | number:'1.0-0' }} VNĐ
+                    </div>
+
+                    <!-- Nút lưu -->
+                    <div style="text-align: right; margin-top: 20px;">
+                      <button (click)="luuCapNhatPhieu()"> Lưu cập nhật</button>
+                      <button (click)="dongPopupCapNhat()">❌ Đóng</button>
+                    </div>
+                  </div>
+
+                  <!-- ✅ POPUP CẬP NHẬT PHIẾU XUẤT -->
+                  <div *ngIf="capNhatXuatMo" class="popup-capnhat">
+
+                    <h3>✏️ Cập nhật phiếu xuất: {{ phieuDangCapNhat.receipt_code }}</h3>
+
+                    <!-- 🔵 Thanh trạng thái -->
+                    <!-- 🔵 Thanh trạng thái kiểu chấm tròn hiện đại -->
+                    <div class="timeline-container">
+                      <div class="timeline">
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã gửi phiếu')">
+                          <div class="circle">1</div>
+                          <span>Đã gửi phiếu</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã duyệt')">
+                          <div class="circle">2</div>
+                          <span>Đã duyệt</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step" [ngClass]="getStepClass(selectedHoaDon.trang_thai, 'Đã nhập hàng vào kho')">
+                          <div class="circle">3</div>
+                          <span>Đã nhập hàng vào kho</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Thông tin -->
+                    <div class="info-row">
+                      <div class="info-section">
+                        <h5> Thời gian</h5>
+                        <p><strong> Ngày tạo:</strong> {{ phieuDangCapNhat.created_date | date:'dd/MM/yyyy' }}</p>
+                        <p><strong> Ngày hẹn:</strong>  
+                          <input type="date" [(ngModel)]="phieuDangCapNhat.delivery_date" />
+                        </p>
+
+                      </div>
+                      <div class="info-section">
+                        <h5> Người nhận hàng</h5>
+                        <p><strong> Logo:</strong></p>
+                        <img [src]="previewLogo || phieuDangCapNhat.logo_url" height="40" *ngIf="phieuDangCapNhat.logo_url || previewLogo" />
+                        <input type="file" (change)="onLogoSelected($event)" />
+                        <p><strong> Tên doanh nghiệp / tổ chức:</strong> <input [(ngModel)]="phieuDangCapNhat.receiver_name" /></p>
+                        <p><strong> Địa chỉ:</strong> <input [(ngModel)]="phieuDangCapNhat.receiver_address" /></p>
+                        <p><strong> Họ và tên người nhận:</strong> {{ phieuDangCapNhat.representative_name }}</p>
+                        <p><strong> Email:</strong> <input [(ngModel)]="phieuDangCapNhat.representative_email" /></p>
+                        <p><strong> SĐT:</strong> <input [(ngModel)]="phieuDangCapNhat.representative_phone" /></p>
+                      </div>
+                    </div>
+
+                    <div class="info-row">
+                      <div class="info-section">
+                        <h5> Thông tin nhân viên tạo , duyệt đơn</h5>
+                        <p><strong> Nhân viên:</strong> {{ phieuDangCapNhat.staff_account_name || 'Chưa có' }}</p>
+                        <p><strong> Email:</strong> {{ phieuDangCapNhat.staff_account_email || 'Chưa có' }}</p><br>
+                        <p><strong> Quản lý:</strong> {{ phieuDangCapNhat.admin_account_name || 'Chưa có' }}</p>
+                        <p><strong> Email:</strong> {{ phieuDangCapNhat.admin_account_email || 'Chưa có' }}</p>
+                      </div>
+                      <div class="info-section">
+                        <h5> Ghi chú & Phản hồi</h5>
+                        <p><strong> Ghi chú:</strong> <textarea [(ngModel)]="phieuDangCapNhat.note"></textarea></p>
+                      </div>
+                    </div>
+
+                    <!-- Danh sách sản phẩm -->
+                    <h4> Danh sách sản phẩm</h4>
+                    <div class="table-scroll-x">
+                      <table class="detail-table">
+                        <thead>
+                          <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Mã SP</th>
+                            <th>Tên SP</th>
+                            <th>Loại</th>
+                            <th>Đơn vị</th>
+                            <th>Khối lượng (kg)</th>
+                            <th>NSX</th>
+                            <th>HSD</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody> 
+                          <tr *ngFor="let sp of phieuDangCapNhat.products; let i = index">
+                            <td>{{ i + 1 }}</td>
+
+                            <!-- Hình ảnh (hiển thị ảnh, không cho upload) -->
+                            <td>
+                              <img [src]="sp.image_url" height="40" *ngIf="sp.image_url" />
+                            </td>
+
+                            <!-- Chỉ hiển thị thông tin (không còn là input) -->
+                            <td>{{ sp.product_code }}</td>
+                            <td>{{ sp.product_name }}</td>
+                            <td>{{ sp.product_type }}</td>
+                            <td>{{ sp.unit }}</td>
+                            <td>{{ sp.weight }} kg</td>
+
+                            <!-- NSX & HSD chỉ hiển thị -->
+                            <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+
+                            <!-- ✅ Số lượng được phép chỉnh -->
+                            <td><input [(ngModel)]="sp.quantity" type="number" /></td>
+
+                            <!-- Giá và thành tiền chỉ hiển thị -->
+                            <td>{{ sp.unit_price | number:'1.0-0' }}</td>
+                            <td>{{ sp.quantity * sp.unit_price | number:'1.0-0' }}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Tổng cộng -->
+                    <div class="total-amount">
+                      <strong> Tổng cộng:</strong> {{ getTongTien(phieuDangCapNhat) | number:'1.0-0' }} VNĐ
+                    </div>
+
+                    <!-- Nút lưu -->
+                    <div style="text-align: right; margin-top: 20px;">
+                      <button (click)="luuCapNhatPhieu()"> Lưu cập nhật</button>
+                      <button (click)="dongPopupCapNhat()">❌ Đóng</button>
+                    </div>
+
+                  </div>
+
+
+                  <br>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>

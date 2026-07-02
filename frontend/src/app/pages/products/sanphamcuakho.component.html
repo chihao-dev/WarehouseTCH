@@ -1,0 +1,122 @@
+
+<body style="background-color: beige;">
+
+  <!-- BỘ LỌC NÂNG CAO -->
+<div class="container py-4">
+  <div class="filter-bar shadow-sm p-3 rounded bg-white mb-4">
+    <h2>Sản phẩm trong kho</h2>
+    <div class="d-flex flex-wrap gap-3">
+      <!-- Các nhóm bộ lọc -->
+      <!-- Khu vực -->
+    <div class="filter-group">
+    <label>Khu vực</label>
+    <select class="form-select" [(ngModel)]="selectedKhuVuc" (change)="onKhuVucChange()">
+        <option value="">Tất cả khu</option>
+        <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.id">{{ kv.ten_khu_vuc }}</option>
+    </select>
+    </div>
+
+    <!-- Loại hàng -->
+    <div class="filter-group">
+    <label>Loại hàng</label>
+    <select class="form-select" [(ngModel)]="selectedType">
+        <option value="">Tất cả loại</option>
+        <option *ngFor="let type of loaiHang" [value]="type">{{ type }}</option>
+    </select>
+    </div>
+
+
+      <div class="filter-group">
+        <label>Tìm kiếm</label>
+        <input type="text" class="form-control" [(ngModel)]="keyword" placeholder="🔍 Mã hoặc tên sản phẩm" />
+      </div>
+
+      <div class="filter-group">
+        <label>⏳ Hạn sử dụng</label>
+        <input type="date" class="form-control" [(ngModel)]="toDate" />
+      </div>
+
+      <div class="filter-group">
+        <label>💰 Giá từ</label>
+        <input type="number" class="form-control" [(ngModel)]="minPrice" placeholder="Min" />
+      </div>
+
+      <div class="filter-group">
+        <label>💰 đến</label>
+        <input type="number" class="form-control" [(ngModel)]="maxPrice" placeholder="Max" />
+      </div>
+    </div>
+
+    <!-- Nút lọc sát phải -->
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-primary fw-bold px-4" (click)="layDanhSachSanPham()">Lọc sản phẩm</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- DANH SÁCH SẢN PHẨM -->
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-lg-3 col-md-4 col-sm-6 mb-4" *ngFor="let sp of sanPhamList" (click)="chonSanPham(sp)">
+      <div class="product-card shadow">
+        <div class="product-image">
+          <img [src]="sp.image_url || '/assets/images/no-image.jpg'" class="img-fluid" alt="{{ sp.product_name }}">
+          <img *ngIf="sp.logo_url" class="supplier-logo" [src]="sp.logo_url" alt="Logo">
+        </div>
+        <!-- Mã vạch -->
+          <div class="barcode mt-2">
+          <img [src]="'https://barcode.tec-it.com/barcode.ashx?data=' + sp.product_code" class="barcode-img" alt="Barcode">
+          </div>
+        <div class="product-info">
+          <h5>{{ sp.product_name }}</h5>
+          <p><strong>Loại:</strong> {{ sp.product_type }}</p>
+          <p><strong>Khu:</strong> {{ sp.ten_khu_vuc || 'Chưa phân' }}</p>
+          <p><strong>Giá:</strong> {{ sp.unit_price | number:'1.0-0' }} đ</p>
+          <p><strong>Số lượng:</strong> {{ sp.quantity }} {{ sp.unit }}</p>
+        </div>
+
+        <!-- ✅ Nút thêm vào đơn hàng bên dưới -->
+        <div class="text-center mb-3">
+          <button class="btn-them-vao-don" (click)="themVaoPhieuMua(sp); $event.stopPropagation()">
+            Thêm vào phiếu xuất
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP CHI TIẾT -->
+<div class="product-modal" *ngIf="selectedProduct">
+  <div class="modal-content">
+    <button class="close-btn" (click)="selectedProduct = null">✖</button>
+    <div class="d-flex">
+      <div>
+        <img [src]="selectedProduct.image_url || '/assets/images/no-image.jpg'" class="popup-img me-3">
+        <!-- ✅ Mã sản phẩm nằm dưới hình -->
+        <div class="text-center mt-2">
+          <p><strong>Mã SP:</strong> {{ selectedProduct.product_code }}</p>
+          <img [src]="'https://barcode.tec-it.com/barcode.ashx?data=' + selectedProduct.product_code" class="barcode-img" alt="Barcode">
+        </div>
+      </div>
+
+      <!-- Thông tin sản phẩm -->
+      <div class="popup-details">
+        <h3>{{ selectedProduct.product_name }}</h3>
+        <p><strong>Loại:</strong> {{ selectedProduct.product_type }}</p>
+        <p><strong>Đơn vị:</strong> {{ selectedProduct.unit }}</p>
+         <p><strong>Trọng lượng 1 đơn vị:</strong> {{ selectedProduct.weight_per_unit }} kg</p>
+        <p><strong>Ngày sản xuất:</strong> {{ selectedProduct.manufacture_date | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Hạn sử dụng:</strong> {{ selectedProduct.expiry_date | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Khu vực:</strong> {{ selectedProduct.ten_khu_vuc }}</p>
+        <p><strong>Số lượng trong kho:</strong> {{ selectedProduct.quantity }}</p>
+        <p><strong>Giá:</strong> {{ selectedProduct.unit_price | number:'1.0-0' }} đ</p>
+        <button class="btn btn-success mt-2" (click)="themVaoPhieuMua(selectedProduct)">Thêm vào phiếu xuất</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
