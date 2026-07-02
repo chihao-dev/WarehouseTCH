@@ -1,4 +1,3 @@
-
 require('./config/env');
 const app = require('./app');
 

@@ -1,0 +1,173 @@
+<body style="background-color: beige;">
+<div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+            <div class="about-service-container">
+              <div class="contact-us section bg-light py-5">
+                <div class="container">
+                  <div class="auth-box">
+                    <div class="text-center mb-4">
+                      <h4>Chào mừng đến với <span class="text-primary">SmartWarehouse</span></h4>
+                      <p>Vui lòng đăng nhập hoặc tạo tài khoản để tiếp tục.</p>
+                    </div>
+
+                    <!-- Tabs -->
+                    <ul class="nav-tabs">
+                      <li class="nav-item">
+                        <button
+                          class="nav-link"
+                          [class.active]="activeTab === 'login'"
+                          (click)="setTab('login')"
+                          type="button"
+                        >
+                          Đăng nhập
+                        </button>
+                      </li>
+                      <li class="nav-item">
+                        <button
+                          class="nav-link"
+                          [class.active]="activeTab === 'register'"
+                          (click)="setTab('register')"
+                          type="button"
+                        >
+                          Đăng ký
+                        </button>
+                      </li>
+                    </ul>
+
+                    <!-- Tab content -->
+                    <div class="tab-content">
+                      <!-- Login Tab -->
+                      <div class="tab-pane" [class.active]="activeTab === 'login'">
+                        <form (ngSubmit)="login()" #loginForm="ngForm" *ngIf="activeTab === 'login'">
+                          <label for="login-email" class="form-label">Email</label>
+                          <input
+                            id="login-email"
+                            name="email"
+                            type="email"
+                            class="form-control"
+                            placeholder="Nhập email"
+                            required
+                            [(ngModel)]="loginData.email"
+                          />
+
+                          <!-- 🔓 Mật khẩu đăng nhập -->
+                          <label for="login-password" class="form-label">Mật khẩu</label>
+                          <div class="position-relative">
+                            <input
+                              id="login-password"
+                              name="password"
+                              [type]="showLoginPassword ? 'text' : 'password'"
+                              class="form-control pe-5"
+                              placeholder="Nhập mật khẩu"
+                              required
+                              [(ngModel)]="loginData.password"
+                            />
+                            <i
+                              class="fa"
+                              [ngClass]="showLoginPassword ? 'fa-eye' : 'fa-eye-slash'"
+                              (click)="showLoginPassword = !showLoginPassword"
+                              style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #999;"
+                            ></i>
+                          </div>
+
+                          <div class="d-grid mt-3">
+                            <button
+                              type="submit"
+                              class="btn btn-primary"
+                              [disabled]="!loginData.email || !loginData.password"
+                            >
+                              Đăng nhập
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+
+                      <!-- Register Tab -->
+                      <div class="tab-pane" [class.active]="activeTab === 'register'">
+                        <form (ngSubmit)="register()" #registerForm="ngForm" *ngIf="activeTab === 'register'">
+                          <label for="reg-name" class="form-label">Họ và tên</label>
+                          <input
+                            id="reg-name"
+                            name="name"
+                            type="text"
+                            class="form-control"
+                            placeholder="Nhập họ tên"
+                            required
+                            [(ngModel)]="registerData.name"
+                          />
+
+                          <label for="reg-email" class="form-label">Email</label>
+                          <input
+                            id="reg-email"
+                            name="email"
+                            type="email"
+                            class="form-control"
+                            placeholder="Nhập email"
+                            required
+                            [(ngModel)]="registerData.email"
+                          />
+
+                          <!-- 🔐 Mật khẩu đăng ký -->
+                          <label for="reg-password" class="form-label">Mật khẩu</label>
+                          <div class="position-relative">
+                            <input
+                              id="reg-password"
+                              name="password"
+                              [type]="showRegisterPassword ? 'text' : 'password'"
+                              class="form-control pe-5"
+                              placeholder="Tạo mật khẩu"
+                              required
+                              [(ngModel)]="registerData.password"
+                            />
+                            <i
+                              class="fa"
+                              [ngClass]="showRegisterPassword ? 'fa-eye' : 'fa-eye-slash'"
+                              (click)="showRegisterPassword = !showRegisterPassword"
+                              style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #999;"
+                            ></i>
+                          </div>
+
+                          <!-- 🔁 Xác nhận mật khẩu -->
+                          <label for="reg-confirm" class="form-label">Xác nhận mật khẩu</label>
+                          <div class="position-relative">
+                            <input
+                              id="reg-confirm"
+                              name="confirm"
+                              [type]="showRegisterConfirm ? 'text' : 'password'"
+                              class="form-control pe-5"
+                              placeholder="Nhập lại mật khẩu"
+                              required
+                              [(ngModel)]="registerData.confirm"
+                            />
+                            <i
+                              class="fa"
+                              [ngClass]="showRegisterConfirm ? 'fa-eye' : 'fa-eye-slash'"
+                              (click)="showRegisterConfirm = !showRegisterConfirm"
+                              style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer; color: #999;"
+                            ></i>
+                          </div>
+
+                          <div class="d-grid mt-3">
+                            <button
+                              type="submit"
+                              class="btn btn-success"
+                              [disabled]="registerForm.invalid"
+                            >
+                              Tạo tài khoản
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+

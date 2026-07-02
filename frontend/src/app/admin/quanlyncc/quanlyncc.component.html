@@ -1,0 +1,118 @@
+<div class="ncc-container">
+  <h2>Tra cứu nhà cung cấp theo mã / tên sản phẩm</h2>
+
+  <div class="search-filter-row">
+    <select [(ngModel)]="selectedAreaId" (change)="locTheoKhuVuc()">
+      <option value="">-- Tất cả khu vực --</option>
+      <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.id">{{ kv.ten_khu_vuc }}</option>
+    </select>
+
+    <input [(ngModel)]="tuKhoa" placeholder="Nhập mã hoặc tên sản phẩm..." />
+    <button (click)="timNhaCungCap()">Tra cứu</button>
+  </div>
+
+  <!-- ⏳ Loading -->
+  <div *ngIf="loading" class="loading">⏳ Đang tìm kiếm...</div>
+
+  <!-- ❌ Không tìm thấy mã -->
+  <div *ngIf="traTheoSanPham && isMaSanPham(tuKhoa) && !loading && !nhaCungCap" class="not-found">
+    ❌ Không tìm thấy nhà cung cấp cho từ khóa "{{ tuKhoa }}"
+  </div>
+
+  <!-- ❌ Không tìm thấy tên -->
+  <div *ngIf="!loading && !isMaSanPham(tuKhoa) && traTheoSanPham && tuKhoa && logosTrongKhuVuc.length === 0" class="not-found">
+    ❌ Không tìm thấy nhà cung cấp phù hợp trong khu vực!
+  </div>
+
+  <!-- ❌ Khu vực không có NCC -->
+  <div *ngIf="!loading && !traTheoSanPham && selectedAreaId && logosTrongKhuVuc.length === 0" class="not-found">
+    ❌ Chưa có nhà cung cấp nào trong khu vực được chọn!
+  </div>
+
+  <!-- ✅ Kết quả tra cứu NCC -->
+  <div *ngIf="nhaCungCap && traTheoSanPham" class="ncc-info-card animate-slide">
+    <div class="ncc-logo-wrapper">
+      <img *ngIf="nhaCungCap.logo_url" [src]="nhaCungCap.logo_url" class="ncc-logo" />
+    </div>
+
+    <h3 class="ncc-name">{{ nhaCungCap.supplier_name }}</h3>
+
+    <div class="ncc-details">
+      <p><span class="icon" style="color: black"><strong>Tên người đại diện:</strong> </span> {{ nhaCungCap.representative_name }}</p>
+      <p><span class="icon" style="color: black"><strong>Email: </strong> </span> {{ nhaCungCap.representative_email }}</p>
+      <p><span class="icon" style="color: black"><strong>Số điện thoại: </strong> </span> {{ nhaCungCap.representative_phone }}</p>
+    </div>
+  </div>
+
+
+
+  <!-- ✅ Danh sách logo -->
+  <div *ngIf="logosTrongKhuVuc.length > 0">
+    <h3>Danh sách nhà cung cấp trong khu vực</h3>
+    <div class="logo-grid">
+      <div
+        *ngFor="let logo of logosTrongKhuVuc"
+        class="logo-card animate-fade"
+        (click)="chonNhaCungCap(logo)"
+      >
+        <img [src]="logo.logo_url" [alt]="logo.supplier_name" />
+        <p>{{ logo.supplier_name }}</p>
+      </div>
+    </div>
+
+    <!-- ✅ Chi tiết nhà cung cấp nâng cao -->
+    <div *ngIf="nhaCungCapChiTiet && !traTheoSanPham" class="ncc-info animate-slide">
+      <h3 class="ncc-title">{{ nhaCungCapChiTiet.supplier_name }}</h3>
+
+      <!-- 🔄 Carousel hiện đại vuốt được -->
+      <div
+        class="carousel-container"
+        (touchstart)="touchStart($event)"
+        (touchend)="touchEnd($event)"
+      >
+       <button class="nav-btn left" [class.disabled]="logoIndex <= 0" [disabled]="logoIndex <= 0" (click)="logoIndex = logoIndex - 1">❮</button>
+
+
+        <div class="carousel-content">
+          <img
+            *ngIf="lichSuNhap[logoIndex]?.logo_url"
+            [src]="lichSuNhap[logoIndex].logo_url"
+            class="carousel-image"
+          />
+        </div>
+
+        <button class="nav-btn right" [class.disabled]="logoIndex >= lichSuNhap.length - 1" [disabled]="logoIndex >= lichSuNhap.length - 1" (click)="logoIndex = logoIndex + 1">❯</button>
+
+      </div>
+
+      <div class="ncc-section">
+        <h4>Thông tin nhà cung cấp</h4>
+        <ul>
+          <li *ngFor="let daiDien of lichSuNhap[logoIndex]?.dai_dien">
+            👤 {{ daiDien.name }} | 📧 {{ daiDien.email }} | 📞 {{ daiDien.phone }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="ncc-section">
+        <h4>Sản phẩm (theo ngày nhập):</h4>
+
+        <div class="product-grid">
+          <div class="product-card" *ngFor="let sp of lichSuNhap[logoIndex]?.san_pham">
+            <img [src]="sp.image_url || 'https://via.placeholder.com/80x80?text=No+Image'" alt="Ảnh sản phẩm" />
+            <div class="info">
+              <div class="code">ID: {{ sp.code }}</div>
+              <div class="name">{{ sp.name }}</div>
+              <div class="date">🕒 {{ sp.import_date | date: 'dd/MM/yyyy' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+
+  </div>
+</div>

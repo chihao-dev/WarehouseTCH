@@ -1,0 +1,218 @@
+
+
+ <div class="main-panel">
+
+  <h2> Quản lý vị trí khu vực kho</h2>
+
+    <div class="location-container">
+
+    <!-- Bộ lọc khu vực -->
+    <div class="filter-bar">
+        <label for="areaSelect">Chọn khu vực:</label>
+        <select id="areaSelect" [(ngModel)]="selectedAreaIndex" (change)="onAreaChange(selectedAreaIndex)">
+        <option *ngFor="let area of areas; index as i" [value]="i">
+            {{ area.ten_khu_vuc }}
+        </option>
+        </select>
+
+    </div>
+
+    <!-- Thống kê -->
+    <div class="stats">
+        <p><strong>Tổng sức chứa toàn kho:</strong> {{ totalWeight }} kg | {{ totalArea }} m²</p>
+        <p><strong>Sức chứa mỗi khu:</strong> 50000 kg | 500 m²</p>
+        <p><strong>Khu đang chứa: {{ selectedArea.name }}:</strong> {{ currentWeightUsed | number:'1.0-0' }} kg | {{ currentAreaUsed | number:'1.1-1' }} m²</p>
+    </div>
+
+    <!-- Danh sách pallet -->
+    <div class="warehouse-map">
+    <div class="path-label">Cửa ra vào</div>
+
+    <div *ngFor="let row of palletGrid; let i = index" class="pallet-row">
+        <!-- Lối đi bên trái có số thứ tự -->
+        <div class="aisle-cell range-label">
+        {{ i * 10 + 1 }}–{{ (i + 1) * 10 }}
+        </div>
+
+        <!-- Các pallet -->
+        <div *ngFor="let pallet of row" class="pallet-wrapper">
+        <div
+        class="pallet-box"
+        (click)="onPalletClick(pallet)"
+        [title]="'KL: ' + pallet.weightUsed + 'kg | DT: ' + pallet.areaUsed.toFixed(1) + 'm²'"
+        [ngClass]="{
+            'pallet-empty': pallet.weightUsed === 0,
+            'pallet-used': pallet.weightUsed > 0 && pallet.weightUsed < 500,
+            'pallet-full': pallet.weightUsed >= 500
+        }">
+        {{ pallet.weightUsed }}kg
+        </div>
+        <div class="pallet-label">{{ pallet.name }}</div>
+        </div>
+        &nbsp;
+    </div>
+    </div>
+
+    <!-- Popup hiển thị thông tin sản phẩm -->
+    <div class="popup-overlay" *ngIf="showPopup">
+    <div class="popup-content-modern">
+        <!-- Nút đóng ở góc trên phải -->
+        <button class="popup-close-btn" (click)="closePopup()">×</button>
+        
+            <div class="product-carousel-wrapper">
+            <button class="nav-btn left" *ngIf="selectedProducts.length > 1"
+                (click)="currentProductIndex = (currentProductIndex - 1 + selectedProducts.length) % selectedProducts.length">←</button>
+
+            <div class="popup-product-modern">
+                <div class="left-column">
+                <img [src]="selectedProducts[currentProductIndex]?.image_url" alt="Hình ảnh sản phẩm" />
+                </div>
+
+                <div class="right-column">
+                <h2>{{ selectedProducts[currentProductIndex]?.product_name }}</h2>
+                <div class="info-grid">
+                <!-- Nhóm 1: Thông tin sản phẩm -->
+                <div class="info-group">
+                    <p><strong>Mã sản phẩm:</strong> {{ selectedProducts[currentProductIndex]?.product_code }}</p>
+                    <p><strong>Loại:</strong> {{ selectedProducts[currentProductIndex]?.product_type }}</p>
+                    <p><strong>Đơn vị:</strong> {{ selectedProducts[currentProductIndex]?.unit }}</p>
+                    <p><strong>Số lượng:</strong> {{ selectedProducts[currentProductIndex]?.quantity }}</p>
+                </div>
+
+                <!-- Nhóm 2: Ngày tháng -->
+                <div class="info-group">
+                    <p><strong>Ngày sản xuất:</strong> {{ selectedProducts[currentProductIndex]?.manufacture_date | date:'dd/MM/yyyy' }}</p>
+                    <p><strong>Hạn sử dụng:</strong> {{ selectedProducts[currentProductIndex]?.expiry_date | date:'dd/MM/yyyy' }}</p>
+                </div>
+
+                <!-- Nhóm 3: Khối lượng và giá -->
+                <div class="info-group">
+                    <p><strong>Khối lượng mỗi đơn vị:</strong> {{ selectedProducts[currentProductIndex]?.weight_per_unit }} kg</p>
+                    <p><strong>Tổng khối lượng:</strong>
+                    {{
+                        (selectedProducts[currentProductIndex]?.quantity || 0) *
+                        (selectedProducts[currentProductIndex]?.weight_per_unit || 0)
+                    }} kg
+                    </p>
+                    <p><strong>Giá mỗi đơn vị:</strong> {{ selectedProducts[currentProductIndex]?.unit_price | number:'1.0-0' }} VNĐ</p>
+                </div>
+
+                <!-- Nhóm 4: Nhập kho -->
+                <div class="info-group">
+                    <p><strong>Phiếu nhập:</strong> {{ selectedProducts[currentProductIndex]?.receipt_code }}</p>
+                    <p><strong>Nhà cung cấp:</strong> {{ selectedProducts[currentProductIndex]?.supplier_name }}</p>
+                </div>
+                </div>
+                </div>
+            </div>
+
+            <button class="nav-btn right" *ngIf="selectedProducts.length > 1"
+                (click)="currentProductIndex = (currentProductIndex + 1) % selectedProducts.length">→</button>
+            </div>
+
+            <div class="extra-info">
+            <p><strong>📦 Vị trí hiện tại:</strong> {{ currentLocation }}</p>
+            <div
+            *ngIf="dangChuyenHangLe && selectedProducts[currentProductIndex]?.otherLocations?.length > 0"
+            class="location-list"
+            >
+            <strong>📍 Cũng có ở:</strong>
+            <span *ngFor="let loc of selectedProducts[currentProductIndex]?.otherLocations; let last = last">
+                {{ loc }}<span *ngIf="!last">, </span>
+            </span>
+            </div>
+            </div>
+            <br>
+            <div class="popup-actions">
+            <button
+                (click)="chonChuyenHang()"
+                [ngClass]="{ 'active-mode': dangChuyenHangLe }"
+            >
+                🔁 Chuyển sản phẩm này
+            </button>
+
+            <button
+                (click)="chonChuyenToanBo()"
+                [ngClass]="{ 'active-mode': !dangChuyenHangLe && choPhepChonPalletDich }"
+            >
+                📦 Chuyển toàn bộ pallet
+            </button>
+            </div>
+
+
+            <!-- ✅ Popup chọn vị trí đích -->
+            <div class="map-popup-overlay" *ngIf="showMapPopup">
+            <div class="map-popup-content">
+            <br>
+            <!-- ✅ Nút X Hủy rõ ràng -->
+            <div class="map-popup-header">
+                <h3>Chọn vị trí chuyển đến</h3>
+                <button class="map-close-btn" (click)="huyChonPalletDich()">×</button>
+            </div>
+            <p>👉 Vui lòng chọn một pallet trống hoặc chưa đầy (≤ 500kg)</p>
+
+            <!-- ✅ Khung xác nhận chuyển nằm phía trên -->
+            <div *ngIf="dangChoXacNhanChuyen && selectedDestinationPallet" class="confirm-box">
+                <p>
+                ✅ Xác nhận chuyển từ <strong>{{ currentLocation }}</strong>
+                ➝ <strong>{{ selectedDestinationPallet.name }}</strong>?
+                </p>
+                <div class="confirm-btns">
+                <button class="btn-confirm" (click)="xacNhanChuyen()">✔ Xác nhận</button>
+                <button class="btn-cancel" (click)="huyChonPalletDich()">✖ Huỷ</button>
+                </div>
+            </div>
+
+            <!-- Bản đồ kho -->
+            <div class="warehouse-map">
+                <div class="path-label">Cửa ra vào</div>
+                <div *ngFor="let row of palletGrid; let i = index" class="pallet-row">
+                <div class="aisle-cell range-label">
+                    {{ i * 10 + 1 }}–{{ (i + 1) * 10 }}
+                </div>
+                <div *ngFor="let pallet of row" class="pallet-wrapper">
+                    <div
+                    class="pallet-box"
+                    (click)="onPalletClick(pallet)"
+                    [title]="'KL: ' + pallet.weightUsed + 'kg | DT: ' + pallet.areaUsed.toFixed(1) + 'm²'"
+                    [ngClass]="{
+                        'pallet-empty': pallet.weightUsed === 0,
+                        'pallet-used': pallet.weightUsed > 0 && pallet.weightUsed < 500,
+                        'pallet-full': pallet.weightUsed >= 500
+                    }"
+                    >
+                    {{ pallet.weightUsed }}kg
+                    </div>
+                    <div class="pallet-label">{{ pallet.name }}</div>
+                </div>
+                </div>
+            </div>
+            </div>
+            </div>
+    </div>
+    </div>
+
+    <!-- 🔔 Thông báo chuyển pallet gần nhất -->
+    <div class="transfer-log">
+    <h3>Lịch sử chuyển vị trí</h3>
+    <table class="log-table">
+        <thead>
+        <tr>
+            <th>🧍 Người chuyển</th>
+            <th>Vị trí cũ</th>
+            <th>Vị trí mới</th>
+            <th>🕒 Thời gian</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let log of transferLogs">
+            <td>{{ log.user_email }}</td>
+            <td>{{ log.from_location }}</td>
+            <td>{{ log.to_location }}</td>
+            <td>{{ log.transfer_time | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+        </tr>
+        </tbody>
+    </table>
+    </div>
+
+</div>

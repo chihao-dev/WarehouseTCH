@@ -46,7 +46,6 @@ export const routes: Routes = [
   { path: 'profile', component: TrangcanhanComponent, canActivate: [AuthGuard] },
   { path: 'products', component: SanphamcuakhoComponent, canActivate: [AuthGuard] },
   { path: 'inventory', component: KiemkehanghoaComponent, canActivate: [AuthGuard] },
-
   // Layout Admin
   {
     path: 'admin',

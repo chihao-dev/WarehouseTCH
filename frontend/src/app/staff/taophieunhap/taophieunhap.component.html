@@ -1,0 +1,142 @@
+<div class="main-panel">
+  <h2>📥 Danh sách phiếu nhập kho</h2>
+
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th>Mã phiếu</th>
+        <th>Nhà cung cấp</th>
+        <th>Ngày tạo</th>
+        <th>Trạng thái</th>
+        <th>Xem</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let p of danhSachPhieu">
+        <!-- Dòng chính -->
+        <tr>
+          <td>{{ p.receipt_code }}</td>
+          <td>{{ p.supplier_name }}</td>
+          <td>{{ p.created_date | date:'dd/MM/yyyy' }}</td>
+          <td><span>{{ p.trang_thai }}</span></td>
+          <td>
+            <button *ngIf="p.trang_thai === 'Đã đăng ký'" (click)="xemChiTiet(p)">🔍 Tạo đơn</button>
+            <button *ngIf="p.trang_thai === 'Đã tạo phiếu - đợi duyệt'" (click)="xemChiTiet(p)">🔄 Cập nhật</button>
+            <button *ngIf="p.trang_thai === 'Đã duyệt - hẹn gặp' || p.trang_thai === 'Hoàn tất nhập hàng'" class="disabled-button" disabled>
+              🔄 Cập nhật
+            </button>
+          </td>
+        </tr>
+
+        <!-- Chi tiết phiếu hiển thị ngay bên dưới -->
+        <tr *ngIf="selectedPhieu?.id === p.id">
+          <td colspan="5">
+            <div class="detail-container">
+              <button class="btn-close-top" (click)="dongChiTiet()">✖</button>
+              <h3>📋 Chi tiết phiếu: {{ selectedPhieu.receipt_code }}</h3>
+
+              <div class="detail-info-wrapper-2col">
+                <div class="info-section">
+                  <h3>⏱ Thông tin thời gian</h3>
+                  <p><strong>📅 Ngày tạo:</strong> {{ selectedPhieu.created_date | date:'MM/dd/yyyy' }}</p>
+                  <p><strong>🗓️ Ngày hẹn:</strong> {{ selectedPhieu.meeting_date | date:'MM/dd/yyyy' }}</p>
+                </div>
+
+                <div class="info-section">
+                  <h3>🏢 Nhà cung cấp</h3>
+                  <p class="supplier-logo">
+                    <strong>🏞️ Logo:</strong>
+                    <img [src]="selectedPhieu.logo_url" alt="Logo nhà cung cấp" height="40" />
+                  </p>
+                  <p><strong>🏢 Tên NCC:</strong> {{ selectedPhieu.supplier_name }}</p>
+                  <p><strong>📍 Địa chỉ:</strong> {{ selectedPhieu.supplier_address }}</p>
+                  <p><strong>👤 Đại diện:</strong> {{ selectedPhieu.full_name }}</p>
+                  <p><strong>📧 Email:</strong> {{ selectedPhieu.supplier_account_email }}</p>
+                  <p><strong>📞 SĐT:</strong> {{ selectedPhieu.phone }}</p>
+                </div>
+
+                <div class="info-section">
+                  <h3>📝 Ghi chú & Phản hồi</h3>
+                  <p><strong>📝 Ghi chú:</strong> {{ selectedPhieu.note || 'Không có' }}</p>
+                  <p><strong>💬 Phản hồi quản lý:</strong> {{ selectedPhieu.note_admin || 'Không có' }}</p>
+                </div>
+              </div>
+
+              <!-- Danh sách sản phẩm -->
+              <h4>📦 Danh sách sản phẩm</h4>
+              <div class="product-table-wrapper">
+                <table class="detail-table">
+                  <thead>
+                    <tr>
+                      <th>STT</th>
+                      <th>Hình ảnh</th>
+                      <th>Tên sản phẩm</th>
+                      <th>Loại</th>
+                      <th>Mã SP</th>
+                      <th>Đơn vị</th>
+                      <th>Khối lượng</th>
+                      <th>Diện tích</th>
+                      <th>Ngày SX</th>
+                      <th>Hạn SD</th>
+                      <th>Số lượng</th>
+                      <th>Đơn giá</th>
+                      <th>Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let sp of selectedPhieu.products; let i = index">
+                      <td>{{ i + 1 }}</td>
+                      <td><img [src]="sp.image_url" height="40" /></td>
+                      <td>{{ sp.product_name }}</td>
+                      <td>{{ sp.product_type }}</td>
+                      <td>{{ sp.product_code }}</td>
+                      <td>{{ sp.unit }}</td>
+                      <td>{{ sp.weight }} kg</td>
+                      <td>{{ sp.area }} m²</td>
+                      <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+                      <td>{{ sp.quantity }}</td>
+                      <td>{{ sp.unit_price | number:'1.0-0' }}</td>
+                      <td>{{ sp.total_price | number:'1.0-0' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="total-amount">
+                <strong>💰 Tổng cộng:</strong>
+                {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ
+              </div>
+
+              <br />
+
+              <p>
+                <strong>👨‍💼 Quản lý duyệt:</strong>
+                {{ selectedPhieu.admin_account_name || 'Chưa có' }} — <em>email:</em>
+                {{ selectedPhieu.admin_account_email || 'Chưa có' }}
+              </p>
+
+              <p>
+                <strong>👨‍💼 Nhân viên xử lý:</strong>
+                {{ selectedPhieu.staff_account_name || 'Chưa có' }} — <em>email:</em>
+                {{ selectedPhieu.staff_account_email || 'Chưa có' }}
+              </p>
+
+              <p>
+                <strong>👨‍💼 Nhân viên hiện tại:</strong>
+                {{ staffName }} — <em>email:</em> {{ staffEmail }}
+              </p>
+
+              <p><strong>💬 Ghi chú kiểm tra:</strong></p>
+              <textarea [(ngModel)]="phanHoiStaff" placeholder="Nhập phản hồi của bạn..."></textarea>
+
+              <div class="button-group">
+                <button (click)="hoanTatKiemTra()">✅ Hoàn tất kiểm tra , tạo đơn</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+</div>

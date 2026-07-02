@@ -1,0 +1,630 @@
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  /* ✅ Mới */
+  background-image: url('../../../assets/img/anh1.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 10%;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(3px);
+}
+
+.content {
+  position: relative;
+  text-align: center;
+  color: #fff;
+  max-width: 950px;
+  padding: 20px;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.6);
+}
+
+.title .highlight {
+  color: #00ffc8;
+  font-weight: 800;
+  text-shadow: 2px 2px 8px #000;
+}
+
+.description {
+  font-size: 1.2rem;
+  line-height: 1.9;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Hiệu ứng fade in */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* tổng quan */
+.overview-section {
+  position: relative;
+  padding: 80px 20px;
+  background-image: url('https://images.unsplash.com/photo-1585128792020-b226f2a58f17?auto=format&fit=crop&w=1470&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #040404;
+}
+
+.overlay-overview {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  z-index: 1;
+}
+
+.container {
+  position: relative;
+  max-width: 1200px;
+  margin: auto;
+  z-index: 2;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+}
+
+.image-slider {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+  text-align: center;
+}
+
+.slider-wrapper {
+  position: relative;
+}
+
+.slider-image {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(65, 63, 63, 0.5);
+  height: 350px;
+  object-fit: cover;
+  transition: all 0.5s ease;
+}
+
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgb(44, 42, 42);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.3s ease;
+}
+
+.nav:hover {
+  background: rgb(85, 84, 84);
+}
+
+.nav.prev {
+  left: 10px;
+}
+
+.nav.next {
+  right: 10px;
+}
+
+.text-box {
+  flex: 1;
+  min-width: 300px;
+}
+
+.text-box h2 {
+  font-size: 2.5rem;
+  margin-bottom: 25px;
+  color: #1263ae;
+}
+
+.info-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.info-list li {
+  margin-bottom: 18px;
+  padding-left: 30px;
+  position: relative;
+}
+
+.info-list li::before {
+  content: "✔";
+  position: absolute;
+  left: 0;
+  color: #00ffc8;
+  font-weight: bold;
+}
+
+/* thông tin vận hành kho */
+.operation-section {
+  position: relative;
+  width: 100%;
+  padding: 100px 20px;
+  background-image: url('https://images.unsplash.com/photo-1617854818580-7d53e6829e12?auto=format&fit=crop&w=1470&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #000000;
+}
+
+.overlay-operation {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0);
+  z-index: 1;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+
+
+.operation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+}
+
+.operation-box {
+  background-color: rgba(231, 210, 17, 0.1);
+  padding: 30px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  transition: transform 0.4s ease, background 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.operation-box:hover {
+  transform: translateY(-10px);
+  background-color: rgb(255, 255, 255);
+}
+
+.operation-box img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 20px;
+  filter: drop-shadow(2px 2px 6px #000);
+}
+
+.operation-box h4 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #0ac849;
+}
+
+.operation-box p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/*KPI*/
+.kpi-section {
+  position: relative;
+  width: 100%;
+  padding: 100px 20px;
+  background-image: url('https://images.unsplash.com/photo-1629196702194-63bb99fb0090?auto=format&fit=crop&w=1470&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+}
+  
+.overlay-kpi {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(10, 10, 10, 0);
+  z-index: 1;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.8rem;
+  margin-bottom: 60px;
+  color: #d98510;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 40px;
+}
+
+.kpi-box {
+  background-color: rgba(231, 210, 17, 0.1);
+  border-radius: 16px;
+  padding: 30px 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  backdrop-filter: blur(5px);
+  transition: transform 0.3s ease;
+}
+
+.kpi-box:hover {
+  transform: translateY(-10px);
+  background-color: rgb(255, 255, 255);
+}
+
+.kpi-box img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 20px;
+  filter: drop-shadow(2px 2px 6px #000);
+}
+
+.kpi-box h3 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0ac849;
+  margin-bottom: 10px;
+}
+
+.kpi-box p {
+  font-size: 1rem;
+  color: #000000;
+}
+
+/*đội ngũ nhân viên */
+.team-section {
+  position: relative;
+  width: 100%;
+  padding: 100px 20px;
+  background-image: url('https://images.unsplash.com/photo-1581092917457-0cf3f69c4c4a?auto=format&fit=crop&w=1470&q=80');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: #fff;
+}
+
+.overlay-staff {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(10, 10, 10, 0);
+  z-index: 1;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: auto;
+  text-align: center;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 40px;
+}
+
+.team-card {
+  background: rgba(231, 210, 17, 0.1);
+  border-radius: 20px;
+  padding: 30px 20px;
+  text-align: center;
+  transition: transform 0.4s ease;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  backdrop-filter: blur(6px);
+}
+
+.team-card:hover {
+  transform: translateY(-10px);
+  background: rgb(255, 255, 255);
+}
+
+.team-card img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  object-fit: cover;
+  border: 3px solid #00ffc8;
+}
+
+.team-card h3 {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: #0ac849;
+}
+
+.position {
+  font-style: italic;
+  color: #000000;
+  margin-bottom: 15px;
+}
+
+.desc {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #000000;
+}
+
+/*phản hồi khách hàng*/
+.messenger-testimonials {
+  padding: 60px 20px;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  color: #00aaff;
+  text-shadow: 1px 1px 3px #aaa;
+}
+
+.chat-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  justify-content: space-between;
+}
+
+.chat-column {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-left: 5%;
+}
+
+/* Bong bóng chung */
+
+
+.chat-bubble.left {
+  justify-content: flex-start;
+}
+
+.chat-bubble.right {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-bubble {
+  display: flex;
+  align-items: flex-end;
+  position: relative; /* quan trọng để z-index hoạt động đúng */
+}
+
+.avatar {
+  position: relative;
+  z-index: 2;
+}
+
+.avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 0 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 2px solid white;
+}
+
+.message {
+  background-color: #f0f0f0;
+  padding: 14px 18px;
+  border-radius: 18px;
+  max-width: 400px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  position: relative;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.chat-bubble.right .message {
+  background-color: #daf1ff;
+}
+
+.name {
+  display: block;
+  font-size: 0.85rem;
+  color: #888;
+  margin-top: 8px;
+  text-align: right;
+}
+
+
+
+/*video kho */
+.warehouse-video-section {
+  padding: 80px 20px;
+  background-color: beige ;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  color: #0066cc;
+}
+
+.video-wrapper {
+  width: 90%;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Tổng thể */
+.team-section-modern {
+  background-color: beige;
+  padding: 80px 0;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+/* Tiêu đề */
+.section-title-glass {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 50px;
+  color: #222;
+  position: relative;
+}
+
+.section-title-glass::after {
+  content: "";
+  width: 60px;
+  height: 4px;
+  background: #ff7f50;
+  display: block;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+/* Grid layout */
+.team-glass-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* Card */
+.team-glass-card {
+  perspective: 1200px;
+  width: 300px;
+  height: 400px;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.9s ease;
+  transform-style: preserve-3d;
+}
+
+.team-glass-card:hover .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Mặt trước và sau */
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 25px;
+  text-align: center;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #333;
+}
+
+/* Avatar */
+.card-front img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  margin: 0 auto 15px;
+  border: 4px solid #ff7f50;
+  box-shadow: 0 0 10px rgba(255, 127, 80, 0.4);
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card-front img:hover {
+  transform: scale(1.05);
+}
+
+/* Thông tin */
+.card-front h3 {
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+
+.card-front .role {
+  font-size: 14px;
+  color: #777;
+  font-style: italic;
+}
+
+/* Mặt sau */
+.card-back {
+  transform: rotateY(180deg);
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 30px;
+  color: #444;
+}
+
+/* Optional: Hover effect border */
+.team-glass-card:hover .card-front {
+  box-shadow: 0 0 20px rgba(255, 127, 80, 0.3);
+}

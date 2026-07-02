@@ -1,0 +1,431 @@
+.about-service-container {
+  padding: 60px 10%;
+  background: beige;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+  margin-top: 10%;
+}
+
+.intro-text {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.intro-text h2 {
+  font-size: 36px;
+  margin-bottom: 15px;
+  color: #2b4eff;
+}
+.intro-text p {
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: auto;
+}
+
+.about-z-layout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+}
+
+.image-box {
+  flex: 1;
+  min-width: 300px;
+}
+.image-box img {
+  width: 100%;
+  border-radius: 12px;
+}
+
+.highlight-box {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  min-width: 300px;
+}
+.highlight {
+  background: #ffffff;
+  border-left: 6px solid #2b4eff;
+  border-radius: 8px;
+  padding: 20px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+.highlight:hover {
+  transform: scale(1.05);
+}
+.highlight h3 {
+  font-size: 28px;
+  margin: 0;
+  color: #2b4eff;
+}
+.highlight p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Animations */
+.animate-slide-in-left {
+  animation: slideInLeft 1s ease forwards;
+}
+.animate-zoom-in {
+  animation: zoomIn 1s ease forwards;
+}
+.animate-fade-in {
+  animation: fadeInUp 1s ease forwards;
+}
+
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-50px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes zoomIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .about-z-layout {
+    flex-direction: column;
+  }
+  .highlight-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+/*danh sách dịch vụ*/
+.our-services-section {
+  padding: 80px 10%;
+  background: #0a2bb200;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: bold;
+  color: #2b4eff;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 50px;
+}
+
+.service-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.service-card {
+  background: white;
+  border-radius: 20px;
+  padding: 30px 25px;
+  text-align: left;
+  transition: all 0.4s ease;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(20px);
+  opacity: 0;
+}
+
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.service-card .icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+.service-card h3 {
+  font-size: 22px;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.service-card p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Card background accents */
+.card1 { border-left: 6px solid #2b4eff; }
+.card2 { border-left: 6px solid #00c4ff; }
+.card3 { border-left: 6px solid #00b894; }
+.card4 { border-left: 6px solid #ff7675; }
+
+/* Animations */
+.animate-slide-up {
+  animation: slideUp 1s ease forwards;
+}
+.animate-slide-up-delay {
+  animation: slideUp 1s 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .title {
+    font-size: 28px;
+  }
+  .service-card {
+    text-align: center;
+  }
+  .service-card .icon {
+    font-size: 40px;
+  }
+}
+
+/*tại sao chọn chúng tôi*/
+.why-us-section {
+  padding: 80px 10%;
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.section-title {
+  font-size: 38px;
+  color: #2b4eff;
+  margin-bottom: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 50px;
+}
+
+.why-us-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  justify-items: center;
+}
+
+.why-card {
+  background: linear-gradient(to bottom right, #ffffff, #f9faff);
+  padding: 35px 25px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+  max-width: 300px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dfe7ff;
+}
+
+.why-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+  border-color: #2b4eff;
+}
+
+.icon-glow {
+  font-size: 48px;
+  color: #2b4eff;
+  margin-bottom: 20px;
+  position: relative;
+  animation: pulseGlow 2.5s infinite;
+}
+
+.why-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.why-card p {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Animations */
+.animate-zoom-in {
+  animation: zoomIn 1.2s ease forwards;
+}
+.animate-zoom-in-delay {
+  animation: zoomIn 1.2s 0.3s ease forwards;
+}
+
+@keyframes zoomIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 0px rgba(43, 78, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(43, 78, 255, 0.8);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 30px;
+  }
+  .why-card {
+    padding: 25px 18px;
+  }
+}
+
+/* Bảng giá*/
+.pricing-section {
+  padding: 80px 10%;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+}
+
+.pricing-title {
+  font-size: 38px;
+  color: #2b4eff;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.pricing-subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 50px;
+}
+
+.pricing-wrapper {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.plan-card {
+  width: 300px;
+  border-radius: 16px;
+  padding: 40px 25px;
+  color: white;
+  position: relative;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.plan-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 16px 35px rgba(0,0,0,0.15);
+}
+
+.plan-card h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.plan-card ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 30px;
+  font-size: 15px;
+  text-align: left;
+  line-height: 1.8;
+}
+
+.btn-plan {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #222;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+.btn-plan:hover {
+  background-color: #fff;
+  color: #2b4eff;
+}
+
+/* Badge (Mác Gói) */
+.plan-badge {
+  position: absolute;
+  top: -16px;
+  left: 20px;
+  background-color: white;
+  color: #222;
+  font-size: 13px;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Màu riêng từng gói */
+.basic {
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+}
+
+.business {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.premium {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+
+/* Animation */
+.animate-fade-in {
+  animation: fadeInUp 1s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .plan-card {
+    width: 100%;
+  }
+}
+

@@ -1,0 +1,399 @@
+<div class="main-panel">
+
+    <h1>Duyệt phiếu xuất kho </h1>
+
+    <!-- Thanh lọc phiếu xuất -->
+    <div class="filter-bar-phieu">
+    <input type="text" [(ngModel)]="filter.keyword" placeholder="🔎 Tìm mã phiếu hoặc tên người nhận..." (input)="locPhieu()" />
+
+    <label>📅 Từ ngày:
+        <input type="date" [(ngModel)]="filter.ngayBatDau" (change)="locPhieu()" />
+    </label>
+
+    <label>📅 Đến ngày:
+        <input type="date" [(ngModel)]="filter.ngayKetThuc" (change)="locPhieu()" />
+    </label>
+
+    <label>Trạng thái:
+        <select [(ngModel)]="filter.trangThai" (change)="locPhieu()">
+        <option value="">Tất cả</option>
+        <option value="Đã gửi phiếu">Đã gửi phiếu</option>
+        <option value="Đã duyệt">Đã duyệt</option>
+        <option value="Đã xuất hàng khỏi kho">Đã xuất hàng khỏi kho</option>
+        </select>
+    </label>
+    </div>
+
+    <table class="invoice-table">
+        <thead>
+        <tr>
+            <th>Mã phiếu</th>
+            <th>Khách hàng / Doanh nghiệp / Tổ chức</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Chức năng</th>
+        </tr>
+        </thead>
+        <ng-container *ngFor="let p of danhSachPhieu">
+            <!-- Dòng phiếu -->
+            <tr>
+            <td>{{ p.receipt_code }}</td>
+            <td>{{ p.receiver_name }}</td>
+            <td>{{ p.created_date | date:'dd/MM/yyyy' }}</td>
+            <td>
+                <!-- Trạng thái -->
+                <span [ngClass]="{
+                'status-duyet': p.trang_thai === 'Đã duyệt',
+                'status-dahoanthanh': p.trang_thai === 'Đã xuất hàng khỏi kho',
+                'status-huy': p.trang_thai === 'Đã hủy'
+                }">
+                {{ p.trang_thai }}
+                </span>
+            </td>
+            <td>
+                <!-- Nút Kiểm tra duyệt phiếu -->
+                <button *ngIf="p.trang_thai === 'Đã gửi phiếu' && p.trang_thai !== 'Đã hủy'" 
+                        (click)="xemChiTiet(p)" 
+                        class="btn-space btn-gray">
+                Kiểm tra duyệt phiếu
+                </button>
+
+                <!-- Nút xác nhận -->
+                <button *ngIf="p.trang_thai === 'Đã duyệt'" 
+                        (click)="xemChiTiet(p)" 
+                        class="btn-confirm">
+                Xác nhận hàng đã xuất kho
+                </button>
+
+                &nbsp;
+            
+                <button 
+                *ngIf="p.trang_thai === 'Đã gửi phiếu' || p.trang_thai === 'Đã hủy' || p.trang_thai === 'Đã duyệt'"
+                (click)="huyPhieu(p)" 
+                [disabled]="p.trang_thai === 'Đã hủy'"
+                [ngClass]="{
+                    'disabled-button': p.trang_thai === 'Đã hủy',
+                    'btn-red': true,
+                    'btn-space': true
+                }">
+                Hủy phiếu
+                </button>
+
+
+                <!-- Nút hoàn thành -->
+                <button *ngIf="p.trang_thai === 'Đã xuất hàng khỏi kho'" class="disabled-button btn-green" disabled>
+                Hoàn thành
+                </button>
+            </td>
+            </tr>
+
+
+
+            <!-- Dòng chi tiết nằm ngay bên dưới -->
+            <tr *ngIf="selectedPhieu?.id === p.id">
+            <td colspan="5">
+                <!-- Nội dung chi tiết phiếu ở đây -->
+                <!-- Chi tiết phiếu -->
+                <div class="detail-container">
+                    <button class="btn-close-top" (click)="dongChiTiet()">✖</button>
+                    <h3>📋 Chi tiết phiếu: {{ selectedPhieu.receipt_code }}</h3>
+
+                    <!-- Thông tin chung -->
+                    <div class="detail-info-wrapper">
+                    <!-- Hàng đầu tiên: Thông tin thời gian -->
+                    <div class="info-row full-width">
+                        <div class="info-section">
+                        <h3>Thông tin thời gian</h3>
+                        <p><strong>Ngày tạo:</strong> {{ selectedPhieu.created_date | date:'MM/dd/yyyy' }}</p>
+                        <p><strong>Ngày hẹn nhập hàng:</strong> {{ selectedPhieu.delivery_date | date:'MM/dd/yyyy' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Hàng thứ hai: 2 cột ngang hàng -->
+                    <div class="info-row two-columns">
+                        <!-- Nhà cung cấp -->
+                        <div class="info-section">
+                        <h3>Thông tin bên nhận hàng</h3>
+                        <p class="supplier-logo">
+                        <strong>Logo nhà cung cấp:</strong>
+                        <ng-container *ngIf="selectedPhieu.logo_url; else noLogo">
+                            <img [src]="selectedPhieu.logo_url" alt="Logo nhà cung cấp" style="height: 50px;" />
+                        </ng-container>
+                        <ng-template #noLogo> Không có</ng-template>
+                        </p>
+                        <p><strong>Tên doanh nghiệp / tổ chức:</strong> {{ selectedPhieu.receiver_name }}</p>
+                        <p><strong>Địa chỉ giao hàng:</strong> {{ selectedPhieu.receiver_address }}</p>
+                        <p><strong>Họ tên người nhận:</strong> {{ selectedPhieu.representative_name }}</p>
+                        <p><strong>Email:</strong> {{ selectedPhieu.representative_email }}</p>
+                        <p><strong> Số điện thoại:</strong> {{ selectedPhieu.representative_phone }}</p>
+                        </div>
+
+                        <!-- Ghi chú -->
+                        <div class="info-section">
+                        <h3>Ghi chú & Phản hồi</h3>
+                        <p>
+                        <strong>Nhân viên tạo phiếu này:</strong><br>
+                        {{ selectedPhieu.staff_account_name || 'Chưa có' }} — <em>email:</em> {{ selectedPhieu.staff_account_email || 'Chưa có' }}
+                        </p>
+                        <p><strong>Ghi chú từ nhân viên:</strong> {{ selectedPhieu.note || 'Không có' }}</p>
+
+                        <br>
+
+                        <!-- Quản lý đang duyệt hiện tại -->
+                        <p>
+                        <strong>Quản lý duyệt:</strong><br>
+                         {{ adminName }} — <em>email:</em> {{ adminEmail }}
+                        </p>
+                        <p><strong>Phản hồi của quản lý kho: </strong> {{ selectedPhieu.note_admin || 'Chưa có' }}</p>
+                        </div>
+                    </div>
+                    </div>
+
+
+                    <!-- Danh sách sản phẩm -->
+                    <h4> Danh sách sản phẩm</h4>
+
+                    <div class="product-table-wrapper">
+                    <div class="scroll-x">
+                    <table class="detail-table">
+                        <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Mã sản phẩm</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Loại</th>
+                            <th>Đơn vị</th>
+                            <th>Trọng lượng 1 sản phẩm (KG)</th>
+                            <th>Trọng lượng lô hàng (KG)</th>
+                            <th>Ngày sản xuất</th>
+                            <th>Hạn sử dụng</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr *ngFor="let sp of selectedPhieu.products; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td><img [src]="sp.image_url" height="40" /></td>
+                            <td>{{ sp.product_code }}</td>
+                            <td>{{ sp.product_name }}</td>
+                            <td>{{ sp.product_type }}</td>
+                            
+                            <td>{{ sp.unit }}</td>
+                            <td>{{ sp.weight_per_unit }} kg</td>
+                            <td>{{ sp.weight }} kg</td>
+                            
+                            <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ sp.quantity }}</td>
+                            <td>{{ sp.unit_price | number:'1.0-0' }}</td>
+                            <td>{{ sp.total_price | number:'1.0-0' }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    </div>
+                    </div>
+
+                    <!-- Tổng tiền -->
+                    <div class="total-amount">
+                    <strong>Tổng cộng:</strong>
+                    {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ 
+                    </div>
+
+                    <br>
+
+                    <p><strong>Gửi phản hồi cho nhân viên:</strong></p>
+                    <textarea [(ngModel)]="phanHoiHeThong" placeholder="Nhập phản hồi cho nhân viên.."></textarea>
+
+
+                    <!-- Nút thực hiện -->
+                    <div class="button-group">
+                    <button (click)="moPopupNhapKho()">
+                    {{ selectedPhieu?.trang_thai === 'Đã duyệt' ? ' Cập nhật phản hồi' : '✅ Duyệt phiếu xuất' }}
+                    </button>
+
+
+
+                    <button 
+                    [disabled]="selectedPhieu.trang_thai !== 'Đã duyệt'" 
+                    [class.disabled-button]="selectedPhieu.trang_thai !== 'Đã duyệt'" 
+                    (click)="xacNhanXuatKhoChinhThuc()">
+                    ✅ Xác nhận xuất hàng khỏi kho
+                    </button> 
+                    </div>
+                    
+
+                    <!-- 📦 POPUP Xác nhận xuất kho -->
+                    <div class="modal" *ngIf="popupNhapKhoMo">
+                    <div class="modal-content wide-modal">
+
+                        <!-- Thông tin phiếu -->
+                        <h3>Xác nhận xuất kho cho phiếu: {{ selectedPhieu.receipt_code }}</h3>
+
+                        <!-- Bộ lọc mã sản phẩm -->
+                        <!-- 🔍 Bộ lọc kiểm tra sản phẩm trùng mã -->
+                        <div class="product-check-section">
+                        <div class="check-row">
+                            <input
+                            [(ngModel)]="maCanKiemTra"
+                            placeholder="🔍 Nhập mã sản phẩm..."
+                            class="filter-input input-field"
+                            />
+                            <button (click)="kiemTraTrongKho()">Kiểm tra</button>
+                        </div>
+
+                        <div class="check-result">
+                            <ng-container *ngIf="danhSachMaTrung === null">
+                            <em style="color: gray;">💡 Hiển thị thông tin , số lượng sản phẩm.</em>
+                            </ng-container>
+
+                            <ng-container *ngIf="danhSachMaTrung !== null && danhSachMaTrung.length === 0">
+                            <span style="color: green;">✅ Không có sản phẩm nào trùng mã!</span>
+                            </ng-container>
+
+                            <ng-container *ngIf="danhSachMaTrung !== null && danhSachMaTrung.length > 0">
+                            <span style="color: crimson;">❌ Mã sản phẩm đã tồn tại: <strong>{{ danhSachMaTrung.join(', ') }}</strong></span>
+                            </ng-container>
+                        </div>
+                        </div>
+
+
+                        <!-- Kết quả -->
+                        <!-- Kết quả -->
+                        <div *ngIf="ketQuaSanPham !== null" style="margin-top: 20px;">
+                        <table class="detail-table" *ngIf="ketQuaSanPham?.product_code">
+                            <thead>
+                            <tr>
+                                <th>Hình ảnh</th>
+                                <th>Mã SP</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Loại</th>
+                                <th>Đơn giá</th>
+                                <th>Đơn vị</th>
+                                <th>Khối lượng (KG)</th>
+                                <th>Ngày sản xu</th>
+                                <th>Hạn sử dụng</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                <img [src]="ketQuaSanPham.image_url" height="40" *ngIf="ketQuaSanPham.image_url" />
+                                </td>
+                                <td class="td-barcode">
+                                <img [src]="'https://barcode.tec-it.com/barcode.ashx?data=' + ketQuaSanPham.product_code + '&code=Code128'" height="40" width="75px" />
+                                </td>
+                                <td>{{ ketQuaSanPham.product_name }}</td>
+                                <td>{{ ketQuaSanPham.product_type }}</td>
+                                <td>{{ ketQuaSanPham.unit_price | number:'1.0-0' }}</td>
+                                <td>{{ ketQuaSanPham.unit }}</td>
+                                <td>{{ ketQuaSanPham.total_weight | number:'1.0-0' }}</td>
+                                <td>{{ ketQuaSanPham.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                                <td>{{ ketQuaSanPham.expiry_date | date:'dd/MM/yyyy' }}</td>
+                                <td>{{ ketQuaSanPham.quantity }}</td>
+                                <td>{{ ketQuaSanPham.total_price | number:'1.0-0' }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Nếu không có -->
+                        <div *ngIf="!ketQuaSanPham.product_code" style="color: crimson; font-weight: bold;">
+                            ❌ Sản phẩm với mã "{{ maCanKiemTra }}" chưa được nhập vào kho!
+                        </div>
+                        </div>
+
+
+
+                        <!-- Logo và tên bên nhận hàng -->
+                        <div style="display: flex; align-items: center; gap: 20px; margin-top: 10px;" class="supplier-logo">
+                        <div>
+                            <p><strong>Tên bên nhận hàng:</strong> {{ selectedPhieu.receiver_name }}</p>
+                            <ng-container *ngIf="selectedPhieu.logo_url && selectedPhieu.logo_url.trim() !== ''">
+                            <img [src]="selectedPhieu.logo_url" alt="Logo bên nhận hàng" />
+                            </ng-container>
+                            <ng-container *ngIf="!selectedPhieu.logo_url || selectedPhieu.logo_url.trim() === ''">
+                            <span style="color: gray; font-style: italic;">(Không có logo)</span>
+                            </ng-container>
+                        </div>
+                        </div>
+
+
+                        <br>
+
+                        <!-- Bảng sản phẩm -->
+                        <table class="detail-table">
+                        <thead>
+                            <tr>
+                            <th>STT</th>
+                            <th>Hình ảnh</th>
+                            <th>Mã SP</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Loại</th>
+                            <th>Đơn giá</th>
+                            <th>Đơn vị</th>
+                            <th>Khối lượng (KG)</th>
+                            <th>Ngày SX</th>
+                            <th>Hạn SD</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let sp of selectedPhieu.products; let i = index">
+                            <td>{{ i + 1 }}</td>
+                            <td>
+                                <img [src]="sp.image_url" height="40" *ngIf="sp.image_url" style="max-width: 100px; object-fit: contain;" />
+                            </td>
+                            <td>
+                                <img [src]="'https://barcode.tec-it.com/barcode.ashx?data=' + sp.product_code + '&code=Code128&translate-esc=false'" height="40" *ngIf="sp.product_code" />
+                                <br />
+                                <span>{{ sp.product_code }}</span>
+                            </td>
+                            <td>{{ sp.product_name }}</td>
+                            <td>{{ sp.product_type }}</td>
+                            <td>{{ sp.unit_price | number:'1.0-0' }}</td>
+                            <td>{{ sp.unit }}</td>
+                            <td>{{ sp.weight }}</td>
+                            <td>{{ sp.manufacture_date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ sp.expiry_date | date:'dd/MM/yyyy' }}</td>
+                            <td>{{ sp.quantity }}</td>
+                            <td>{{ sp.total_price | number:'1.0-0' }}</td>
+                            </tr>
+                        </tbody>
+                        </table>
+
+
+                        <!-- Tổng tiền -->
+                        <div class="total-amount" style="margin-top: 15px;">
+                        <strong> Tổng cộng:</strong> {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <!-- Nút hành động --> 
+                        <div class="button-group">
+                        <!-- Nút kiểm tra hoàn tất -->
+                        <button  
+                        (click)="hoanTatKiemTra()"
+                        [disabled]="selectedPhieu?.trang_thai === 'Đã xuất hàng khỏi kho'"
+                        [ngStyle]="{ opacity: selectedPhieu?.trang_thai === 'Đã xuất hàng khỏi kho' ? '0.6' : '1' }">
+                         Hoàn tất
+                        </button>
+                        
+                        <button (click)="dongPopup()" style="background-color: red"> Đóng</button>
+                        </div>
+                    </div>
+                    </div>
+
+                </div>
+            </td>
+            </tr>
+        </ng-container>
+    </table>
+
+    
+
+</div>

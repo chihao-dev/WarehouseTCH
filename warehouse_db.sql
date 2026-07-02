@@ -10,7 +10,6 @@ CREATE TABLE users (
 
   role ENUM('user', 'admin', 'staff') DEFAULT 'user',
   status ENUM('active', 'inactive') DEFAULT 'active',
-
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -26,7 +25,6 @@ CREATE TABLE user_info (
   image_url TEXT,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
 
 
 -- Bảng phiếu nhập kho (goods receipt)
@@ -67,7 +65,6 @@ CREATE TABLE goods_receipts (
   ) DEFAULT 'Đã gửi phiếu',
 
   invoice_issued BOOLEAN DEFAULT false,
-
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

@@ -1,0 +1,472 @@
+<div class="main-panel">
+
+<h1> Quản lý hàng tồn - kiểm kê</h1>
+
+<div class="filter-panel">
+  <div class="filter-row">
+    <div class="filter-group">
+      <label>Mã sản phẩm</label>
+      <input [(ngModel)]="filters.ma" class="filter-input" />
+    </div>
+
+    <div class="filter-group">
+      <label>Tên sản phẩm</label>
+      <input [(ngModel)]="filters.ten" class="filter-input" />
+    </div>
+
+    <div class="filter-group">
+      <label>Khu vực</label>
+      <select [(ngModel)]="filters.khuVuc" class="filter-input">
+        <option value="">Tất cả khu vực</option>
+        <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.ten_khu_vuc">{{ kv.ten_khu_vuc }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Tình trạng</label>
+      <select [(ngModel)]="filters.tinhTrang" class="filter-input">
+        <option value="">Tất cả</option>
+        <option value="du">🟢 Đủ</option>
+        <option value="thieu">🔴 Thiếu</option>
+        <option value="du_thua">🟡 Dư</option>
+        <option value="chua_kiem">🕒 Chưa kiểm</option>
+        <option value="dang_kiem">⏳ Đang kiểm</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <div class="filter-group">
+      <label> Số lượng tồn min</label>
+      <input type="number" [(ngModel)]="filters.slMin" class="filter-input" />
+    </div>
+
+    <div class="filter-group">
+      <label>Số lượng tồn max</label>
+      <input type="number" [(ngModel)]="filters.slMax" class="filter-input" />
+    </div>
+
+   <div class="filter-group">
+      <label>Bán chạy</label>
+      <select [(ngModel)]="filters.banChayHon" class="filter-input">
+        <option [ngValue]="null">Tất cả</option>
+        <option [ngValue]="1">Chỉ bán chạy</option>
+        <option [ngValue]="0">Không bán chạy</option>
+      </select>
+    </div>
+
+
+    <div class="filter-group">
+      <label> Hạn dùng còn khoảng (ngày)</label>
+      <input type="number" [(ngModel)]="filters.hanSuDung" class="filter-input" />
+    </div>
+  </div>
+
+  <div class="filter-button-row">
+    <button (click)="locSanPham()" class="btn btn-filter">🔎 Lọc</button>
+    <button (click)="resetBoLoc()" class="btn btn-clear">🔄 Đặt lại</button>
+  </div>
+</div>
+
+<div class="action-bar d-flex align-items-center justify-content-between" style="margin: 10px 0;">
+  <div class="d-flex align-items-center flex-wrap gap-2">
+    
+    <!-- 🔍 Bộ lọc trạng thái chọn -->
+    <!-- 🔍 Bộ lọc trạng thái chọn -->
+    <div class="ms-3 loc-trang-thai-select">
+      <select class="form-select form-select-sm" [(ngModel)]="boLocChon">
+        <option value="">Tất cả</option>
+        <option value="chon">Đã chọn</option>
+        <option value="bo">Chưa chọn</option>
+      </select>
+    </div>
+
+    <button class="btn btn-select-all" (click)="chonTatCa()">✅ Chọn tất cả</button>
+    <button class="btn btn-unselect-all" (click)="boChonTatCa()">🚫 Bỏ chọn tất cả</button>
+
+
+    <button class="btn btn-secondary" (click)="moDanhSachKiemKe()">
+      Danh sách kiểm kê ({{ getDanhSachSanPhamDuocChon().length }})
+    </button>
+
+    <span *ngIf="currentInventoryBatchId" class="fw-bold text-primary ms-2">
+      📌 Mã đợt: {{ currentBatchCode }}
+    </span>
+
+    
+  </div>
+</div>
+
+
+
+<table class="product-table">
+  <thead>
+    <tr>
+      <th>✅</th>
+      <th>Hình</th>
+      <th>Mã sản phẩm</th>
+      <th>Tên sản phẩm</th>
+      <th>Khu vực</th>
+      <th>Số lượng tồn kho</th>
+      <th>Hạn sử dụng</th>
+      <th>Giá</th>
+      <th>Tình trạng</th> <!-- Thêm -->
+      <th>Thất thoát</th> <!-- Thêm -->
+      <th>Nhân viên kiểm kê</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let sp of danhSachSanPhamLocTheoChon">
+      <tr (click)="moPopupChiTiet(sp)">
+        <td>
+          <input
+            type="checkbox"
+            [(ngModel)]="sp.selected"
+            (click)="toggleCheckbox(sp, $event)"
+            class="checkbox"
+            [disabled]="isCheckboxDisabled(sp)"
+          />
+        </td>
+        <td><img [src]="sp.image_url" width="50" /></td>
+        <td (click)="$event.stopPropagation()"><div class="barcode-text">{{ sp.product_code }}</div></td>
+        <td>
+          {{ sp.product_name }}<br>
+          <span *ngIf="sp.isHot" class="badge bg-danger text-light ms-2">🔥 Bán chạy</span>
+          <span *ngIf="sp.isSale" class="badge bg-warning text-dark ms-2">⚡ Sale</span>
+        </td>
+        <td>{{ sp.ten_khu_vuc }}</td>
+        <td [ngClass]="{
+              'low-stock': +sp.quantity === 0,
+              'medium-stock': +sp.quantity > 0 && +sp.quantity <= 10,
+              'good-stock': +sp.quantity > 10
+            }">
+          <span *ngIf="+sp.quantity === 0">⛔ Hết hàng</span>
+          <span *ngIf="+sp.quantity > 0">{{ sp.quantity }}</span>
+        </td>
+        <td>
+          {{ sp.expiry_date | date: 'shortDate' }}
+          <div
+            class="expiry-countdown"
+            [ngClass]="{
+              'danger-text': demNguocMap[sp.product_code] === '⛔ Đã hết hạn',
+              'warning-text': isWarning(sp.product_code)
+            }"
+          >
+            ⏳ {{ demNguocMap[sp.product_code] }}
+          </div>
+        </td>
+        <td>{{ sp.unit_price | number:'1.0-0' }} VND</td>
+
+        <!-- 🆕 Thêm Tình trạng -->
+        <td [ngClass]="getClassTinhTrang(sp)">
+          <!-- Nếu là sản phẩm mới thì luôn hiển thị "Chưa kiểm" -->
+          <ng-container *ngIf="sp.isNew">
+            🕒 Chưa kiểm
+          </ng-container>
+
+          <!-- Nếu không phải sản phẩm mới -->
+          <ng-container *ngIf="!sp.isNew">
+            <ng-container *ngIf="sp.actual_quantity != null">
+              {{
+                sp.actual_quantity < sp.quantity ? '🔴 Thiếu ' + (sp.quantity - sp.actual_quantity) :
+                sp.actual_quantity > sp.quantity ? '🟡 Dư ' + (sp.actual_quantity - sp.quantity) :
+                '🟢 Đủ'
+              }}
+            </ng-container>
+            <ng-container *ngIf="sp.actual_quantity == null">
+              <span *ngIf="sp.selected">⏳ Đang kiểm</span>
+              <span *ngIf="!sp.selected">🕒 Chưa kiểm</span>
+            </ng-container>
+          </ng-container>
+        </td>
+
+
+        <!-- 🆕 Thêm Thất thoát -->
+        <td [ngClass]="getClassTinhTrang(sp)">
+          <ng-container *ngIf="!sp.isNew && sp.actual_quantity != null">
+            {{ tinhThatThoat(sp) | number:'1.0-0' }}
+          </ng-container>
+          <span *ngIf="sp.isNew || sp.actual_quantity == null">—</span>
+        </td>
+
+
+        <td>{{ sp.isNew || sp.actual_quantity == null ? '—' : (sp.kiem_ke_email || '—') }}</td>
+
+        <td (click)="$event.stopPropagation()">
+          <button class="btn btn-log" (click)="xemLichSu(sp, $event)">Lịch sử</button>
+        </td>
+      </tr>
+      <tr *ngIf="sanPhamDangMoLog === sp.product_code">
+        <td colspan="15">
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Khu vực</th>
+                <th>Vị trí</th>
+                <th>SL đã trừ</th>
+                <th>Thời gian</th>
+                <th>Mã phiếu xuất</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let log of logHistory[sp.product_code]">
+                <td>{{ log.ten_khu_vuc }}</td>
+                <td>{{ log.pallet_name }}</td>
+                <td>{{ log.quantity_deducted }}</td>
+                <td>{{ log.timestamp | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td>{{ log.receipt_code }}</td>
+              </tr>
+              <tr *ngIf="!logHistory[sp.product_code]?.length">
+                <td colspan="5">Chưa có đơn xuất hàng.</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+
+<div class="popup-backdrop" *ngIf="popupVisible">
+  <div class="popup-card">
+    <button class="popup-close" (click)="dongPopup()">❌</button>
+    <h3>{{ selectedProduct?.product_name }}</h3>
+    <img [src]="selectedProduct?.image_url" class="product-image" alt="Ảnh sản phẩm" />
+    <p><strong>Mã sản phẩm:</strong> {{ selectedProduct?.product_code }}</p>
+    <p><strong>Loại hàng:</strong> {{ selectedProduct?.product_type }}</p>
+    <p><strong>Đơn vị:</strong> {{ selectedProduct?.unit }}</p>
+    <p><strong>Số lượng tồn:</strong> {{ selectedProduct?.quantity }}</p>
+    <p><strong>Khu vực:</strong> {{ selectedProduct?.ten_khu_vuc }}</p>
+    <p><strong>Ngày sản xuất:</strong> {{ selectedProduct?.manufacture_date | date }}</p>
+    <p><strong>Hạn sử dụng:</strong> {{ selectedProduct?.expiry_date | date }}</p>
+    <p><strong>Giá mỗi đơn vị:</strong> {{ selectedProduct?.unit_price | number:'1.0-0' }} VND</p>
+    <h4>📍 Vị trí các lô hàng</h4>
+    <table class="location-table" *ngIf="loHangCungMa.length > 0">
+      <thead>
+        <tr>
+          <th>Vị trí</th>
+          <th>Khu vực</th>
+          <th>Số lượng</th>
+          <th>Ngày nhập</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let l of loHangCungMa">
+          <td>{{ l.location }}</td>
+          <td>{{ l.ten_khu_vuc }}</td>
+          <td>{{ l.quantity }}</td>
+          <td>{{ l.import_date | date:'shortDate' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showDanhSachKiemKePopup }" style="background-color: rgba(0,0,0,0.3);"> 
+  <div class="modal-dialog" style="max-width: 95vw;">
+    <div class="modal-content">
+     <div class="modal-header d-flex justify-content-between align-items-start">
+        <div>
+          <h2 class="modal-title mb-0">
+            Danh sách sản phẩm sẽ kiểm kê ({{ getDanhSachSanPhamDuocChon().length }})
+          </h2>
+          <span *ngIf="currentInventoryBatchId" class="fw-bold text-primary d-block mt-2 fs-5">
+            Mã đợt: {{ currentBatchCode }} <br />
+            Tên đợt: {{ currentBatchName }} <br />
+            Ngày tạo: {{ currentBatchCreatedAt | date: 'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+        
+        <button type="button" class="btn-close" (click)="showDanhSachKiemKePopup = false"></button>
+      </div>
+
+
+      <!-- 🔍 Thanh tìm kiếm và bộ lọc -->
+      <div class="filter-row">
+        <div class="filter-item">
+          <input
+            type="text"
+            class="form-control filter-input"
+            placeholder="🔍 Tìm theo tên / mã SP"
+            [(ngModel)]="filterKiemKe.keyword"
+          />
+        </div>
+
+        <div class="filter-item">
+          <select class="form-select filter-select" [(ngModel)]="filterKiemKe.khuVuc">
+            <option value="">🏬 Tất cả khu vực</option>
+            <option *ngFor="let kv of danhSachKhuVuc" [value]="kv.ten_khu_vuc">
+              {{ kv.ten_khu_vuc }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <select class="form-select filter-select" [(ngModel)]="filterKiemKe.tinhTrang">
+            <option value="">📊 Tất cả tình trạng</option>
+            <option value="du">🟢 Đủ</option>
+            <option value="thieu">🔴 Thiếu</option>
+            <option value="du_thua">🟡 Dư</option>
+            <option value="dang_kiem">⏳ Đang kiểm</option>
+          </select>
+        </div>
+
+        <div class="filter-item position-relative" id="email-dropdown-container">
+          <input
+            type="text"
+            class="form-control with-dropdown-arrow"
+            placeholder="👤 Tìm email kiểm kê"
+            [(ngModel)]="filterKiemKe.email"
+            (input)="updateFilteredEmails()"
+            autocomplete="off"
+          />
+          
+          <span class="dropdown-arrow" (click)="toggleEmailDropdown($event)">▼</span>
+
+          <ul *ngIf="showEmailDropdown" class="dropdown-list">
+            <li
+              *ngFor="let email of filteredEmailSuggestions"
+              (click)="selectEmail(email)">
+              {{ email }}
+            </li>
+          </ul>
+        </div>
+
+
+      </div>
+
+
+
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+        <table class="table table-bordered table-hover align-middle text-center">
+          <thead class="table-light">
+            <tr>
+              <th>Hình</th>
+              <th>Mã sản phẩm</th>
+              <th>Tên sản phẩm</th>
+              <th>Khu vực</th>
+              <th>Tồn kho</th>
+              <th>Tình trạng</th>
+              <th>Ghi chú</th>
+              <th>Người kiểm</th>
+              <th *ngIf="currentInventoryBatchId || hasNewProducts()">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sp of getDanhSachSanPhamDuocChon()">
+              <td><img [src]="sp.image_url" width="50" /></td>
+              <td>{{ sp.product_code }}</td>
+              <td>
+                {{ sp.product_name }}
+                <span *ngIf="sp.isNew" class="badge bg-warning text-dark ms-2">🆕 MỚI</span>
+              </td>
+              <td>{{ sp.ten_khu_vuc }}</td>
+              <td class="bg-success bg-opacity-25 fw-bold">{{ sp.quantity }}</td>
+              <td [ngClass]="getClassTinhTrang(sp)">
+                <!-- Nếu là sản phẩm mới thì luôn hiển thị "Chưa kiểm" -->
+                <ng-container *ngIf="sp.isNew">
+                  🕒 Chưa kiểm
+                </ng-container>
+
+                <!-- Nếu không phải sản phẩm mới -->
+                <ng-container *ngIf="!sp.isNew">
+                  <ng-container *ngIf="sp.actual_quantity != null">
+                    {{
+                      sp.actual_quantity < sp.quantity ? '🔴 Thiếu ' + (sp.quantity - sp.actual_quantity) :
+                      sp.actual_quantity > sp.quantity ? '🟡 Dư ' + (sp.actual_quantity - sp.quantity) :
+                      '🟢 Đủ'
+                    }}
+                  </ng-container>
+                  <span *ngIf="sp.actual_quantity == null">⏳ Đang kiểm</span>
+                </ng-container>
+              </td>
+              <td>{{ sp.isNew || sp.actual_quantity == null ? '—' : (sp.ghi_chu || '—') }}</td>
+              <td>{{ sp.isNew || sp.actual_quantity == null ? '—' : (sp.kiem_ke_email || '—') }}</td>
+              <td *ngIf="currentInventoryBatchId || sp.isNew">
+                <div class="d-flex justify-content-center gap-2">
+                  <button 
+                    *ngIf="!sp.isNew"
+                    class="btn btn-sm btn-warning"
+                    (click)="demLaiSanPham(sp)">
+                    🔁 Đếm lại
+                  </button>
+
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="boKhoiDanhSachKiemKe(sp)">
+                    Xóa
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="getDanhSachSanPhamDuocChon().length === 0">
+              <td colspan="8">Chưa có sản phẩm nào được chọn để kiểm kê.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="text-end mb-2" *ngIf="getDanhSachSanPhamDuocChon().length > 0">
+          <button 
+            class="btn btn-sm btn-outline-danger" 
+            (click)="xoaTatCaKhoiDanhSachKiemKe()">
+            ❌ Xoá tất cả
+          </button>
+        </div>
+      </div>
+      
+
+      <!-- Trong modal-footer của popup kiểm kê -->
+      <div class="modal-footer">
+        <button 
+          class="btn btn-primary"
+          [disabled]="currentInventoryBatchId && !hasNewProducts()"
+          [ngClass]="{ 'btn-secondary': currentInventoryBatchId && !hasNewProducts() }"
+          (click)="currentInventoryBatchId ? assignSelectedProductsToBatch() : startCreateInventoryBatch()">
+          {{ currentInventoryBatchId ? 'Thêm sản phẩm mới chọn' : 'Tạo đợt từ danh sách' }}
+        </button>
+
+        <button 
+          *ngIf="currentInventoryBatchId"
+          class="btn btn-success"
+          (click)="ketThucDotKiemKe()">
+          Kết thúc đợt kiểm
+        </button>
+
+        <button 
+          *ngIf="currentInventoryBatchId"
+          class="btn-delete"
+          (click)="huyDotKiemKe()">
+          Huỷ kiểm kê
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal" tabindex="-1" [ngClass]="{ 'show d-block': showCreateBatchModal }" style="background-color: rgba(0,0,0,0.3);z-index: 1100;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🆕 Tạo Đợt Kiểm Kê Mới</h5>
+        <button type="button" class="btn-close" (click)="showCreateBatchModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="batchName" class="form-label">Tên đợt kiểm kê:</label>
+          <input type="text" id="batchName" class="form-control" [(ngModel)]="newBatchName" placeholder="Ví dụ: Kiểm kê Tháng 7/2025" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="showCreateBatchModal = false">Hủy</button>
+        <button type="button" class="btn btn-primary" (click)="createNewInventoryBatch()">Tạo đợt kiểm kê</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>

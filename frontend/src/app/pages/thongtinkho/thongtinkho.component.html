@@ -1,0 +1,265 @@
+
+<body style="background-color: beige;">
+
+  <div class="main-banner wow fadeIn" id="top" data-wow-duration="1s" data-wow-delay="0.5s">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+
+            <div class="hero-section">
+              <div class="overlay"></div>
+              <div class="content" data-aos="fade-up">
+                <h1 class="title">Chào mừng đến với <br><span class="highlight">T&H Warehouse Manager</span></h1>
+                <p class="description">
+                  <strong>T&H Warehouse Manager</strong> là hệ thống quản lý kho hiện đại, sở hữu trung tâm lưu trữ có diện tích lên tới <strong>10.000 m²</strong>,
+                  được trang bị đầy đủ hệ thống <strong>quản lý kho tự động (WMS)</strong>, <strong>giám sát an ninh 24/7</strong> cùng tiêu chuẩn <strong>ISO 9001</strong>.
+                  <br><br>
+                  Vị trí chiến lược ngay trung tâm logistics, giúp kết nối hiệu quả với các tuyến vận chuyển nội địa và quốc tế.
+                  Hệ thống hỗ trợ <strong>theo dõi hàng hóa thời gian thực</strong>, <strong>quản lý tồn kho tối ưu</strong>, và tích hợp dễ dàng với hệ thống ERP của doanh nghiệp.
+                  <br><br>
+                  Chúng tôi tự hào đồng hành cùng hơn <strong>150 đối tác trong và ngoài nước</strong>, mang lại giải pháp lưu trữ hiệu quả, minh bạch và an toàn cho mọi quy mô doanh nghiệp.
+                </p>
+              </div>
+            </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tổng quan kho -->
+  <div class="overview-section">
+    <div class="overlay-overview"></div>
+    <div class="container">
+      <div class="grid">
+        <!-- Slider ảnh trái -->
+        <div class="image-slider" data-aos="fade-right">
+          <div class="slider-wrapper">
+            <img [src]="images[currentIndex]" alt="Warehouse" class="slider-image" />
+            <button class="nav prev" (click)="prevSlide()">❮</button>
+            <button class="nav next" (click)="nextSlide()">❯</button>
+          </div>
+        </div>
+
+        <!-- Nội dung mô tả phải -->
+        <div class="text-box" data-aos="fade-left">
+          <h2>Thông Tin Tổng Quan Về Kho</h2>
+          <ul class="info-list">
+            <li><strong>Diện tích tổng thể:</strong> Hơn 10.000 m², phục vụ lưu trữ quy mô lớn.</li>
+            <li><strong>Vị trí địa lý:</strong> Trung tâm logistics, giao thông thuận tiện đến cảng & sân bay.</li>
+            <li><strong>Sức chứa:</strong> Kệ cao tầng, khoang lưu trữ tối ưu, quản lý WMS.</li>
+            <li><strong>Trang thiết bị:</strong> Camera AI, PCCC tự động, xe nâng điện.</li>
+            <li><strong>Tiêu chuẩn chất lượng:</strong> ISO 9001, an toàn - chính xác - hiệu quả.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thông tin vận hành kho-->
+  <div class="operation-section">
+    <div class="overlay-operation"></div>
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-down">Thông Tin Vận Hành Kho</h2>
+
+      <div class="operation-grid">
+        <!-- Box 1 -->
+        <div class="operation-box" data-aos="zoom-in" data-aos-delay="100">
+          <img src="https://cdn-icons-png.flaticon.com/512/2618/2618577.png" alt="Nhập/xuất" />
+          <h4>Quy trình nhập/xuất hàng</h4>
+          <p>Quy trình tiêu chuẩn 5 bước đảm bảo chính xác 99.9% trong xử lý, kiểm tra và lưu trữ hàng hóa.</p>
+        </div>
+
+        <!-- Box 2 -->
+        <div class="operation-box" data-aos="zoom-in" data-aos-delay="200">
+          <img src="https://cdn-icons-png.flaticon.com/512/4203/4203420.png" alt="Giờ hoạt động" />
+          <h4>Thời gian hoạt động</h4>
+          <p>Hoạt động liên tục <strong>24/7</strong>, đảm bảo phục vụ mọi khung giờ giao/nhận hàng.</p>
+        </div>
+
+        <!-- Box 3 -->
+        <div class="operation-box" data-aos="zoom-in" data-aos-delay="300">
+          <img src="https://cdn-icons-png.flaticon.com/512/3135/3135789.png" alt="Nhân viên" />
+          <h4>Số lượng nhân viên</h4>
+          <p>Hơn <strong>80 nhân viên</strong> chuyên nghiệp, được đào tạo bài bản về vận hành và an toàn kho.</p>
+        </div>
+
+        <!-- Box 4 -->
+        <div class="operation-box" data-aos="zoom-in" data-aos-delay="400">
+          <img src="https://cdn-icons-png.flaticon.com/512/4240/4240829.png" alt="Tự động hóa" />
+          <h4>Tự động hóa & phần mềm</h4>
+          <p>Ứng dụng hệ thống <strong>WMS, RFID, AI Camera</strong>, tích hợp trực tiếp với phần mềm ERP.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI-->
+  <div class="kpi-section">
+    <div class="overlay-kpi"></div>
+    <div class="container">
+      <h2 class="section-title" data-aos="fade-down">Số liệu thống kê nổi bật</h2>
+
+      <div class="kpi-grid">
+        <div class="kpi-box" data-aos="zoom-in" data-aos-delay="100">
+          <img src="https://cdn-icons-png.flaticon.com/512/3471/3471617.png" alt="Diện tích">
+          <h3>{{ areaCount }} m²</h3>
+          <p>Diện tích kho hiện tại</p>
+        </div>
+
+        <div class="kpi-box" data-aos="zoom-in" data-aos-delay="200">
+          <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" alt="Kiểm kê">
+          <h3>{{ accuracyCount }}%</h3>
+          <p>Độ chính xác kiểm kê</p>
+        </div>
+
+        <div class="kpi-box" data-aos="zoom-in" data-aos-delay="300">
+          <img src="https://cdn-icons-png.flaticon.com/512/1239/1239715.png" alt="Giám sát">
+          <h3>24/7</h3>
+          <p>Giám sát an ninh liên tục</p>
+        </div>
+
+        <div class="kpi-box" data-aos="zoom-in" data-aos-delay="400">
+          <img src="https://cdn-icons-png.flaticon.com/512/189/189688.png" alt="Đối tác">
+          <h3>{{ partnerCount }}+</h3>
+          <p>Đối tác logistics</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- đội ngũ nhân viên-->
+  <!-- đội ngũ nhân viên -->
+  <div class="team-section-modern">
+    <div class="container">
+      <h2 class="section-title-glass" data-aos="fade-down">🌟 Đội Ngũ Quản Lý Kho</h2>
+
+      <div class="team-glass-grid">
+        <!-- Member 1 -->
+        <div class="team-glass-card" data-aos="flip-left" data-aos-delay="100">
+          <div class="card-inner">
+            <div class="card-front">
+              <img src="../../../assets/img/chihao.jpg" alt="Trần Chí Hào">
+              <h3>Trần Chí Hào</h3>
+              <p class="role">Quản lý vận hành kho</p>
+            </div>
+            <div class="card-back">
+              <p>🛠️ 10+ năm kinh nghiệm vận hành logistics, chuyên gia tối ưu hóa không gian và quy trình WMS.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member 2 -->
+        <div class="team-glass-card" data-aos="flip-right" data-aos-delay="200">
+          <div class="card-inner">
+            <div class="card-front">
+              <img src="../../../assets/img/xuantruongg.jpg" alt="Nguyễn Xuân Trường">
+              <h3>Nguyễn Xuân Trường</h3>
+              <p class="role">Quản lý điều phối kho</p>
+            </div>
+            <div class="card-back">
+              <p>📦 Điều phối hệ thống phân phối lớn phía Nam, kiểm kê chính xác, triển khai RFID hiệu quả.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- phản hồi khách hàng -->
+  <div class="messenger-testimonials">
+    <h2 class="title">Phản hồi khách hàng</h2>
+
+    <div class="chat-columns">
+      <!-- Cột trái -->
+      <div class="chat-column">
+        <div class="chat-bubble left">
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=11" alt="Avatar" />
+          </div>
+          <div class="message">
+            <p>
+              “T&H Warehouse thật sự đáng tin cậy, xử lý hàng cực kỳ chính xác và đúng tiến độ!”
+            </p>
+            <span class="name">– DHL Vietnam</span>
+          </div>
+        </div>
+
+        <div class="chat-bubble left">
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=5" alt="Avatar" />
+          </div>
+          <div class="message">
+            <p>
+              “T&H giúp chúng tôi tối ưu kho vận toàn miền Nam. Hệ thống WMS tích hợp rất mượt.”
+            </p>
+            <span class="name">– IBM Asia</span>
+          </div>
+        </div>
+
+        <div class="chat-bubble left">
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=15" alt="Avatar" />
+          </div>
+          <div class="message">
+            <p>
+              “Chất lượng kho đạt chuẩn quốc tế, đáp ứng được nhu cầu lưu trữ linh hoạt.”
+            </p>
+            <span class="name">– Panasonic VN</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cột phải -->
+      <div class="chat-column">
+        <div class="chat-bubble right">
+          <div class="message">
+            <p>
+              “Dịch vụ lưu kho cực tốt, đội ngũ chuyên nghiệp, hệ thống giám sát hiện đại!”
+            </p>
+            <span class="name">– FedEx Logistics</span>
+          </div>
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=32" alt="Avatar" />
+          </div>
+        </div>
+
+        <div class="chat-bubble right">
+          <div class="message">
+            <p>
+              “Chúng tôi hài lòng với tốc độ xử lý đơn và sự chủ động từ T&H Warehouse.”
+            </p>
+            <span class="name">– Shopee Fulfillment</span>
+          </div>
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=28" alt="Avatar" />
+          </div>
+        </div>
+
+        <div class="chat-bubble right">
+          <div class="message">
+            <p>
+              “Đối tác logistics chiến lược của chúng tôi hơn 3 năm nay. Uy tín & hiệu quả.”
+            </p>
+            <span class="name">– Lazada Supply Chain</span>
+          </div>
+          <div class="avatar">
+            <img src="https://i.pravatar.cc/50?img=7" alt="Avatar" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- video kho hàng -->
+  <div class="warehouse-video-section">
+  <h2 class="section-title">Khám phá kho hàng T&H</h2>
+  <div class="video-wrapper" data-aos="zoom-in">
+    <video controls autoplay muted loop>
+      <source src="../../../assets/videos/5.mp4" type="video/mp4">
+      Trình duyệt không hỗ trợ video.
+    </video>
+  </div>
+</div>
+</body>
