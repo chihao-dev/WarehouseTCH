@@ -16,6 +16,7 @@ exports.post__api_phieu_nhap = (req, res) => {
 
   const {
     created_at,
+    created_date,
     supplier_name,
     supplier_address,
     meeting_date,
@@ -26,6 +27,8 @@ exports.post__api_phieu_nhap = (req, res) => {
     representative_email,
     representative_phone
   } = fields;
+
+  const final_created_at = created_at || created_date;
 
   if (!email) {
     return res.status(400).json({ message: '❌ Thiếu email người dùng' });
@@ -65,10 +68,11 @@ exports.post__api_phieu_nhap = (req, res) => {
         (created_at, supplier_name, supplier_address, logo_url, user_id, total_amount,
          meeting_date, note,
          staff_account_name, staff_account_email, admin_account_email,
-         representative_name, representative_email, representative_phone)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         representative_name, representative_email, representative_phone,
+         status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        created_at,
+        final_created_at,
         supplier_name,
         supplier_address,
         logo_url,
@@ -83,7 +87,8 @@ exports.post__api_phieu_nhap = (req, res) => {
 
         representative_name || null,
         representative_email || null,
-        representative_phone || null
+        representative_phone || null,
+        'Đã gửi phiếu'
       ],
       (err, result) => {
         if (err) {
@@ -138,18 +143,31 @@ exports.get__api_hoa_don_userId = (req, res) => {
   const userId = req.params.userId;
 
   const nhapQuery = `
-    SELECT pnk.*, 'Phiếu nhập kho' AS loai,
+    SELECT pnk.*,
+           CASE
+             WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+             WHEN pnk.logo_url IS NOT NULL THEN CONCAT('http://localhost:3000', pnk.logo_url)
+             ELSE NULL
+           END AS logo_url,
+           TRIM(IFNULL(pnk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pnk.created_at AS created_date,
+           pnk.admin_note AS note_admin,
+           'Phiếu nhập kho' AS loai,
            ui.full_name, ui.phone, ui.date_of_birth
     FROM goods_receipts pnk
-    JOIN user_info ui ON pnk.user_id = ui.user_id
+    LEFT JOIN user_info ui ON pnk.user_id = ui.user_id
     WHERE pnk.user_id = ?
   `;
 
   const xuatQuery = `
-    SELECT pxk.*, 'Phiếu xuất kho' AS loai,
+    SELECT pxk.*,
+           TRIM(IFNULL(pxk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pxk.created_at AS created_date,
+           pxk.admin_note AS note_admin,
+           'Phiếu xuất kho' AS loai,
            ui.full_name, ui.phone, ui.date_of_birth
     FROM goods_issue_receipts pxk
-    JOIN user_info ui ON pxk.user_id = ui.user_id
+    LEFT JOIN user_info ui ON pxk.user_id = ui.user_id
     WHERE pxk.user_id = ?
   `;
 
@@ -221,10 +239,23 @@ exports.get__api_hoa_don_userId = (req, res) => {
 
 exports.get__api_phieu_nhap = async (req, res) => {
   const query = `
-    SELECT pnk.*, ui.full_name, ui.phone
+    SELECT pnk.id, pnk.receipt_code, pnk.supplier_name, pnk.supplier_address,
+           CASE
+             WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+             WHEN pnk.logo_url IS NOT NULL THEN CONCAT('http://localhost:3000', pnk.logo_url)
+             ELSE NULL
+           END AS logo_url,
+           pnk.total_amount, pnk.meeting_date, pnk.note, pnk.status,
+           pnk.staff_account_name, pnk.staff_account_email,
+           pnk.admin_account_name, pnk.admin_account_email,
+           pnk.representative_name, pnk.representative_email, pnk.representative_phone,
+           TRIM(IFNULL(pnk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pnk.created_at AS created_date,
+           pnk.admin_note AS note_admin,
+           ui.full_name, ui.phone
     FROM goods_receipts pnk
-    JOIN user_info ui ON pnk.user_id = ui.user_id
-    ORDER BY pnk.created_at DESC, pnk.id DESC
+    LEFT JOIN user_info ui ON pnk.user_id = ui.user_id
+    ORDER BY created_date DESC, pnk.id DESC
   `;
 
   db.query(query, async (err, results) => {
@@ -263,7 +294,8 @@ exports.get__api_phieu_nhap = async (req, res) => {
 
 exports.put__api_phieu_nhap_id_staff_cap_nhat = (req, res) => {
   const { id } = req.params;
-  const { staff_account_email, staff_account_name, note, status } = req.body;
+  const { staff_account_email, staff_account_name, note, status, trang_thai } = req.body;
+  const final_status = status || trang_thai;
 
   const query = `
     UPDATE goods_receipts 
@@ -275,7 +307,7 @@ exports.put__api_phieu_nhap_id_staff_cap_nhat = (req, res) => {
     WHERE id = ?
   `;
 
-  db.query(query, [staff_account_email, staff_account_name, note, status, id], (err) => {
+  db.query(query, [staff_account_email, staff_account_name, note, final_status, id], (err) => {
     if (err) {
       console.error('Lỗi cập nhật thông tin nhân viên:', err);
       return res.status(500).json({ message: '❌ Lỗi cập nhật thông tin nhân viên' });
@@ -287,7 +319,9 @@ exports.put__api_phieu_nhap_id_staff_cap_nhat = (req, res) => {
 
 exports.put__api_phieu_nhap_id_admin_cap_nhat = (req, res) => {
   const { id } = req.params;
-  const { status, admin_note, admin_account_email, admin_account_name } = req.body;
+  const { status, trang_thai, admin_note, note_admin, admin_account_email, admin_account_name } = req.body;
+  const final_status = status || trang_thai;
+  const final_admin_note = admin_note || note_admin;
 
   const query = `
     UPDATE goods_receipts 
@@ -298,7 +332,7 @@ exports.put__api_phieu_nhap_id_admin_cap_nhat = (req, res) => {
     WHERE id = ?
   `;
 
-  db.query(query, [status, admin_note, admin_account_email, admin_account_name, id], (err) => {
+  db.query(query, [final_status, final_admin_note, admin_account_email, admin_account_name, id], (err) => {
     if (err) {
       console.error('❌ Lỗi khi cập nhật phiếu:', err); // 👈 Thêm dòng này để debug
       return res.status(500).json({ message: 'Lỗi khi duyệt phiếu' });
@@ -309,16 +343,17 @@ exports.put__api_phieu_nhap_id_admin_cap_nhat = (req, res) => {
 
 exports.put__api_phieu_nhap_id_hoan_tat = (req, res) => {
   const id = req.params.id;
-  const { status } = req.body;
+  const { status, trang_thai } = req.body;
+  const final_status = status || trang_thai;
 
   // Kiểm tra đầu vào
-  if (!status || typeof status !== 'string') {
-    return res.status(400).json({ error: '⚠️ Thiếu hoặc sai định dạng trường "status"' });
+  if (!final_status || typeof final_status !== 'string') {
+    return res.status(400).json({ error: '⚠️ Thiếu hoặc sai định dạng trường "status" hoặc "trang_thai"' });
   }
 
   const sql = 'UPDATE goods_receipts SET status = ? WHERE id = ?';
 
-  db.query(sql, [status, id], (err, result) => {
+  db.query(sql, [final_status, id], (err, result) => {
     if (err) {
       console.error('❌ Lỗi SQL khi cập nhật phiếu:', err);
       return res.status(500).json({ error: '❌ Lỗi server khi cập nhật phiếu' });
@@ -360,7 +395,7 @@ exports.post__api_phieu_xuat = (req, res) => {
 
     const total_amount = parseFloat(body.total_amount || 0);
     const total_weight = parseFloat(body.total_weight || 0);
-    const created_at = body.created_at || new Date().toISOString().split('T')[0];
+    const created_at = body.created_at || body.created_date || new Date().toISOString().split('T')[0];
 
     // Tạo mã phiếu xuất
     const generateCode = () => {
@@ -465,7 +500,14 @@ exports.post__api_phieu_xuat = (req, res) => {
 };
 
 exports.get__api_phieu_xuat = (req, res) => {
-  const sql = `SELECT * FROM goods_issue_receipts ORDER BY created_at DESC`;
+  const sql = `
+    SELECT pxk.*,
+           TRIM(IFNULL(pxk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pxk.created_at AS created_date,
+           pxk.admin_note AS note_admin
+    FROM goods_issue_receipts pxk
+    ORDER BY pxk.created_at DESC
+  `;
   db.query(sql, (err, rows) => {
     if (err) return res.status(500).json({ error: 'Lỗi khi truy vấn phiếu xuất' });
     res.json(rows);
@@ -483,14 +525,16 @@ exports.get__api_phieu_xuat_id_san_pham = (req, res) => {
 
 exports.put__api_phieu_xuat_id_admin_cap_nhat = (req, res) => {
   const id = req.params.id;
-  const { status, admin_note, admin_account_name, admin_account_email } = req.body;
+  const { status, trang_thai, admin_note, note_admin, admin_account_name, admin_account_email } = req.body;
+  const final_status = status || trang_thai;
+  const final_admin_note = admin_note || note_admin;
 
   const sql = `
     UPDATE goods_issue_receipts
     SET status = ?, admin_note = ?, admin_account_name = ?, admin_account_email = ?
     WHERE id = ?
   `;
-  db.query(sql, [status, admin_note, admin_account_name, admin_account_email, id], (err, result) => {
+  db.query(sql, [final_status, final_admin_note, admin_account_name, admin_account_email, id], (err, result) => {
     if (err) {
       console.error('Lỗi khi cập nhật phiếu xuất:', err);
       return res.status(500).json({ message: 'Lỗi server' });
@@ -606,17 +650,30 @@ exports.put__api_phieu_xuat_id_xuat_hoa_don = (req, res) => {
 
 exports.get__api_hoa_don = (req, res) => {
   const nhapQuery = `
-    SELECT pnk.*, 'Phiếu nhập kho' AS loai,
+    SELECT pnk.*,
+           CASE
+             WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+             WHEN pnk.logo_url IS NOT NULL THEN CONCAT('http://localhost:3000', pnk.logo_url)
+             ELSE NULL
+           END AS logo_url,
+           TRIM(IFNULL(pnk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pnk.created_at AS created_date,
+           pnk.admin_note AS note_admin,
+           'Phiếu nhập kho' AS loai,
            ui.full_name, ui.phone, ui.date_of_birth
     FROM goods_receipts pnk
-    JOIN user_info ui ON pnk.user_id = ui.user_id
+    LEFT JOIN user_info ui ON pnk.user_id = ui.user_id
   `;
 
   const xuatQuery = `
-    SELECT pxk.*, 'Phiếu xuất kho' AS loai,
+    SELECT pxk.*,
+           TRIM(IFNULL(pxk.status, 'Đã gửi phiếu')) AS trang_thai,
+           pxk.created_at AS created_date,
+           pxk.admin_note AS note_admin,
+           'Phiếu xuất kho' AS loai,
            ui.full_name, ui.phone, ui.date_of_birth
     FROM goods_issue_receipts pxk
-    JOIN user_info ui ON pxk.user_id = ui.user_id
+    LEFT JOIN user_info ui ON pxk.user_id = ui.user_id
   `;
 
   db.query(nhapQuery, async (err1, nhapList) => {
@@ -738,4 +795,3 @@ exports.put__api_phieu_xuat_kho_id_huy = (req, res) => {
     res.json({ message: 'Hủy phiếu thành công' });
   });
 };
-

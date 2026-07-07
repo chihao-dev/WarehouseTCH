@@ -13,7 +13,7 @@ const ProductService = {
     const prefix = `KV${khu_vuc_id}_L`;
     const [rows] = await dbPromise.query(
       `SELECT IFNULL(MAX(CAST(SUBSTRING_INDEX(location, 'L', -1) AS UNSIGNED)), 0) as maxNum
-       FROM products_detail WHERE khu_vuc_id = ?`,
+       FROM product_details WHERE warehouse_area_id = ?`,
       [khu_vuc_id]
     );
     const maxNum = rows[0].maxNum || 0;
@@ -55,13 +55,14 @@ const ProductService = {
     // Bắt đầu Transaction
     await dbPromise.beginTransaction();
     try {
-      const location = product.location || await this.generateNextLocation(product.khu_vuc_id, dbPromise);
+      const khu_vuc_id = product.warehouse_area_id || product.khu_vuc_id;
+      const location = product.location || await this.generateNextLocation(khu_vuc_id, dbPromise);
 
       const insertSql = `
-        INSERT INTO products_detail (
+        INSERT INTO product_details (
           product_code, product_name, product_type, unit, quantity, weight, area,
           manufacture_date, expiry_date, unit_price, total_price,
-          khu_vuc_id, supplier_name, image_url, logo_url,
+          warehouse_area_id, supplier_name, image_url, logo_url,
           old_product_code, receipt_code, location,
           weight_per_unit, area_per_unit
         )
@@ -72,7 +73,7 @@ const ProductService = {
         parseInt(product.quantity), parseFloat(product.weight), parseFloat(product.area || 0),
         product.manufacture_date, product.expiry_date,
         parseFloat(product.unit_price), parseFloat(product.total_price),
-        product.khu_vuc_id || null, product.supplier_name || '',
+        khu_vuc_id || null, product.supplier_name || '',
         product.image_url, product.logo_url,
         product.old_product_code || null, product.receipt_code || null, location,
         weightPerUnit, areaPerUnit

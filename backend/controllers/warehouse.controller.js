@@ -11,20 +11,12 @@ const ProductService = require('../services/product.service');
 const UserProfileService = require('../services/user.service');
 
 exports.get__api_khu_vuc = (req, res) => {
-  db.query('SELECT * FROM warehouse_areas ORDER BY id ASC', (err, rows) => {
+  db.query('SELECT id, area_name AS ten_khu_vuc FROM warehouse_areas ORDER BY id ASC', (err, rows) => {
     if (err) {
       console.error('Lỗi khi lấy khu vực:', err);
       return res.status(500).json({ message: 'Lỗi server' });
     }
     res.json(rows);
-  });
-};
-
-exports.get__api_khu_vuc = (req, res) => {
-  const sql = 'SELECT id, area_name FROM warehouse_areas ORDER BY id ASC';
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ message: 'Lỗi truy vấn khu vực' });
-    res.json(results);
   });
 };
 
@@ -71,12 +63,6 @@ exports.get__api_log_tru_hang_productCode = async (req, res) => {
   }
 };
 
-exports.get__api_khu_vuc = (req, res) => {
-  db.query('SELECT id, area_name FROM warehouse_areas', (err, result) => {
-    if (err) return res.status(500).json({ error: 'Lỗi server' });
-    res.json(result);
-  });
-};
 
 exports.get__api_suppliers_by_product_product_code = (req, res) => {
   const code = req.params.product_code;
@@ -84,8 +70,16 @@ exports.get__api_suppliers_by_product_product_code = (req, res) => {
 
   let sql = `
     SELECT 
-      goods_receipts.supplier_name, 
-      goods_receipts.logo_url, 
+      IFNULL(goods_receipts.supplier_name, product_details.supplier_name) AS supplier_name,
+      CASE
+        WHEN goods_receipts.logo_url LIKE 'http%' THEN goods_receipts.logo_url
+        WHEN goods_receipts.logo_url IS NOT NULL AND goods_receipts.logo_url != '' THEN
+          IF(goods_receipts.logo_url LIKE '/%', CONCAT('http://localhost:3000', goods_receipts.logo_url), CONCAT('http://localhost:3000/', goods_receipts.logo_url))
+        WHEN product_details.logo_url LIKE 'http%' THEN product_details.logo_url
+        WHEN product_details.logo_url IS NOT NULL AND product_details.logo_url != '' THEN
+          IF(product_details.logo_url LIKE '/%', CONCAT('http://localhost:3000', product_details.logo_url), CONCAT('http://localhost:3000/', product_details.logo_url))
+        ELSE NULL
+      END AS logo_url,
       goods_receipts.representative_name, 
       goods_receipts.representative_email, 
       goods_receipts.representative_phone,
@@ -124,22 +118,25 @@ exports.get__api_suppliers_by_khu_vuc_khuvuc_id = (req, res) => {
 
   const sql = `
     SELECT 
-      pnk.supplier_name,
-      pnk.logo_url,
-      pnk.representative_name,
-      pnk.representative_email,
-      pnk.representative_phone,
+      COALESCE(pnk.supplier_name, pd.supplier_name) AS supplier_name,
+      MAX(CASE
+        WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+        WHEN pnk.logo_url IS NOT NULL AND pnk.logo_url != '' THEN
+          IF(pnk.logo_url LIKE '/%', CONCAT('http://localhost:3000', pnk.logo_url), CONCAT('http://localhost:3000/', pnk.logo_url))
+        WHEN pd.logo_url LIKE 'http%' THEN pd.logo_url
+        WHEN pd.logo_url IS NOT NULL AND pd.logo_url != '' THEN
+          IF(pd.logo_url LIKE '/%', CONCAT('http://localhost:3000', pd.logo_url), CONCAT('http://localhost:3000/', pd.logo_url))
+        ELSE NULL
+      END) AS logo_url,
+      MAX(pnk.representative_name) AS representative_name,
+      MAX(pnk.representative_email) AS representative_email,
+      MAX(pnk.representative_phone) AS representative_phone,
       MAX(pd.import_date) AS newest_import
     FROM product_details pd
-    JOIN goods_receipts pnk ON pd.receipt_code = pnk.receipt_code
+    LEFT JOIN goods_receipts pnk ON pd.receipt_code = pnk.receipt_code
     WHERE pd.warehouse_area_id = ?
-      AND pnk.supplier_name IS NOT NULL
-    GROUP BY 
-      pnk.supplier_name,
-      pnk.logo_url,
-      pnk.representative_name,
-      pnk.representative_email,
-      pnk.representative_phone
+      AND (pnk.supplier_name IS NOT NULL OR pd.supplier_name IS NOT NULL)
+    GROUP BY supplier_name
     ORDER BY newest_import DESC
   `;
 
@@ -155,21 +152,24 @@ exports.get__api_suppliers_by_khu_vuc_khuvuc_id = (req, res) => {
 exports.get__api_suppliers_recent = (req, res) => {
   const sql = `
     SELECT 
-      goods_receipts.supplier_name,
-      goods_receipts.logo_url,
-      goods_receipts.representative_name,
-      goods_receipts.representative_email,
-      goods_receipts.representative_phone,
+      COALESCE(goods_receipts.supplier_name, product_details.supplier_name) AS supplier_name,
+      MAX(CASE
+        WHEN goods_receipts.logo_url LIKE 'http%' THEN goods_receipts.logo_url
+        WHEN goods_receipts.logo_url IS NOT NULL AND goods_receipts.logo_url != '' THEN
+          IF(goods_receipts.logo_url LIKE '/%', CONCAT('http://localhost:3000', goods_receipts.logo_url), CONCAT('http://localhost:3000/', goods_receipts.logo_url))
+        WHEN product_details.logo_url LIKE 'http%' THEN product_details.logo_url
+        WHEN product_details.logo_url IS NOT NULL AND product_details.logo_url != '' THEN
+          IF(product_details.logo_url LIKE '/%', CONCAT('http://localhost:3000', product_details.logo_url), CONCAT('http://localhost:3000/', product_details.logo_url))
+        ELSE NULL
+      END) AS logo_url,
+      MAX(goods_receipts.representative_name) AS representative_name,
+      MAX(goods_receipts.representative_email) AS representative_email,
+      MAX(goods_receipts.representative_phone) AS representative_phone,
       MAX(product_details.import_date) AS newest_import
     FROM product_details
-    JOIN goods_receipts 
+    LEFT JOIN goods_receipts
       ON product_details.receipt_code = goods_receipts.receipt_code
-    GROUP BY 
-      goods_receipts.supplier_name, 
-      goods_receipts.logo_url, 
-      goods_receipts.representative_name, 
-      goods_receipts.representative_email, 
-      goods_receipts.representative_phone
+    GROUP BY supplier_name
     ORDER BY newest_import DESC
     LIMIT 10
   `;
@@ -188,21 +188,34 @@ exports.get__api_suppliers_detail_by_name_supplier_name = (req, res) => {
 
   const sql = `
     SELECT 
-      pnk.logo_url,
+      CASE
+        WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+        WHEN pnk.logo_url IS NOT NULL AND pnk.logo_url != '' THEN
+          IF(pnk.logo_url LIKE '/%', CONCAT('http://localhost:3000', pnk.logo_url), CONCAT('http://localhost:3000/', pnk.logo_url))
+        WHEN pd.logo_url LIKE 'http%' THEN pd.logo_url
+        WHEN pd.logo_url IS NOT NULL AND pd.logo_url != '' THEN
+          IF(pd.logo_url LIKE '/%', CONCAT('http://localhost:3000', pd.logo_url), CONCAT('http://localhost:3000/', pd.logo_url))
+        ELSE NULL
+      END AS logo_url,
       pnk.representative_name,
       pnk.representative_email,
       pnk.representative_phone,
       pd.product_code,
       pd.product_name,
-      pd.image_url,               -- ✅ thêm dòng này để lấy ảnh sản phẩm
+      CASE
+        WHEN pd.image_url LIKE 'http%' THEN pd.image_url
+        WHEN pd.image_url IS NOT NULL AND pd.image_url != '' THEN
+          IF(pd.image_url LIKE '/%', CONCAT('http://localhost:3000', pd.image_url), CONCAT('http://localhost:3000/', pd.image_url))
+        ELSE NULL
+      END AS image_url,
       pd.import_date
     FROM product_details pd
-    JOIN goods_receipts pnk ON pd.receipt_code = pnk.receipt_code
-    WHERE pnk.supplier_name = ?
+    LEFT JOIN goods_receipts pnk ON pd.receipt_code = pnk.receipt_code
+    WHERE (pnk.supplier_name = ? OR pd.supplier_name = ?)
     ORDER BY pd.import_date ASC
   `;
 
-  db.query(sql, [name], (err, rows) => {
+  db.query(sql, [name, name], (err, rows) => {
     if (err) {
       console.error('❌ Lỗi truy vấn chi tiết NCC:', err);
       return res.status(500).json({ error: 'Lỗi server' });
@@ -268,9 +281,17 @@ exports.get__api_suppliers_by_product_name_product_name = (req, res) => {
   const khuVucId = req.query.warehouse_area_id;
 
   let sql = `
-    SELECT DISTINCT 
-      pnk.supplier_name,
-      pnk.logo_url
+    SELECT
+      COALESCE(pnk.supplier_name, pd.supplier_name) AS supplier_name,
+      MAX(CASE
+        WHEN pnk.logo_url LIKE 'http%' THEN pnk.logo_url
+        WHEN pnk.logo_url IS NOT NULL AND pnk.logo_url != '' THEN
+          IF(pnk.logo_url LIKE '/%', CONCAT('http://localhost:3000', pnk.logo_url), CONCAT('http://localhost:3000/', pnk.logo_url))
+        WHEN pd.logo_url LIKE 'http%' THEN pd.logo_url
+        WHEN pd.logo_url IS NOT NULL AND pd.logo_url != '' THEN
+          IF(pd.logo_url LIKE '/%', CONCAT('http://localhost:3000', pd.logo_url), CONCAT('http://localhost:3000/', pd.logo_url))
+        ELSE NULL
+      END) AS logo_url
     FROM product_details pd
     LEFT JOIN goods_receipts pnk ON pd.receipt_code = pnk.receipt_code
     WHERE pd.product_name LIKE ?
@@ -282,7 +303,7 @@ exports.get__api_suppliers_by_product_name_product_name = (req, res) => {
     params.push(khuVucId);
   }
 
-  sql += ` ORDER BY pd.id DESC`;
+  sql += ` GROUP BY supplier_name ORDER BY MAX(pd.id) DESC`;
 
   db.query(sql, params, (err, result) => {
     if (err) {
@@ -989,7 +1010,15 @@ exports.get__api_doanh_thu = (req, res) => {
 exports.get__api_nha_cung_cap = async (req, res) => {
   try {
     const [rows] = await db.promise().execute(`
-      SELECT p1.supplier_name, p1.logo_url, p1.supplier_address, COUNT(p2.id) AS tong_phieu
+      SELECT
+        p1.supplier_name,
+        CASE
+          WHEN p1.logo_url LIKE 'http%' THEN p1.logo_url
+          WHEN p1.logo_url IS NOT NULL THEN CONCAT('http://localhost:3000', p1.logo_url)
+          ELSE NULL
+        END AS logo_url,
+        p1.supplier_address,
+        COUNT(p2.id) AS tong_phieu
       FROM goods_receipts p1
       INNER JOIN (
           SELECT supplier_name, MAX(created_at) AS max_date
@@ -998,7 +1027,7 @@ exports.get__api_nha_cung_cap = async (req, res) => {
       ) latest ON p1.supplier_name = latest.supplier_name 
                AND p1.created_at = latest.max_date
       LEFT JOIN goods_receipts p2 ON p2.supplier_name = p1.supplier_name
-      GROUP BY p1.supplier_name, p1.logo_url, p1.supplier_address
+      GROUP BY p1.supplier_name, logo_url, p1.supplier_address
       ORDER BY p1.supplier_name ASC
     `);
 

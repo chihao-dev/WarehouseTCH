@@ -11,7 +11,7 @@
         <label for="areaSelect">Chọn khu vực:</label>
         <select id="areaSelect" [(ngModel)]="selectedAreaIndex" (change)="onAreaChange(selectedAreaIndex)">
         <option *ngFor="let area of areas; index as i" [value]="i">
-            {{ area.ten_khu_vuc }}
+            {{ area.area_name }}
         </option>
         </select>
 
@@ -21,7 +21,7 @@
     <div class="stats">
         <p><strong>Tổng sức chứa toàn kho:</strong> {{ totalWeight }} kg | {{ totalArea }} m²</p>
         <p><strong>Sức chứa mỗi khu:</strong> 50000 kg | 500 m²</p>
-        <p><strong>Khu đang chứa: {{ selectedArea.name }}:</strong> {{ currentWeightUsed | number:'1.0-0' }} kg | {{ currentAreaUsed | number:'1.1-1' }} m²</p>
+        <p><strong>Khu đang chứa: {{ selectedArea.area_name }}:</strong> {{ currentWeightUsed | number:'1.0-0' }} kg | {{ currentAreaUsed | number:'1.1-1' }} m²</p>
     </div>
 
     <!-- Danh sách pallet -->
@@ -58,7 +58,7 @@
     <div class="popup-content-modern">
         <!-- Nút đóng ở góc trên phải -->
         <button class="popup-close-btn" (click)="closePopup()">×</button>
-        
+
             <div class="product-carousel-wrapper">
             <button class="nav-btn left" *ngIf="selectedProducts.length > 1"
                 (click)="currentProductIndex = (currentProductIndex - 1 + selectedProducts.length) % selectedProducts.length">←</button>

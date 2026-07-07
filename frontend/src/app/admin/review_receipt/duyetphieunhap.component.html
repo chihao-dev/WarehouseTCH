@@ -42,29 +42,29 @@
             <td>{{ p.created_date | date:'dd/MM/yyyy' }}</td>
             <td>
             <span [ngClass]="{
-                'status-duyet': p.trang_thai === 'Đã duyệt',
-                'status-dahoanthanh': p.trang_thai === 'Đã nhập hàng vào kho',
-                'status-huy': p.trang_thai === 'Đã hủy'
+                'status-duyet': (p.trang_thai || p.status) === 'Đã duyệt',
+                'status-dahoanthanh': (p.trang_thai || p.status) === 'Đã nhập hàng vào kho',
+                'status-huy': (p.trang_thai || p.status) === 'Đã hủy'
             }">
-                {{ p.trang_thai }}
+                {{ p.trang_thai || p.status || 'Đã gửi phiếu' }}
             </span>
             </td>
             <td>
-           <button *ngIf="p.trang_thai === 'Đã gửi phiếu' && p.trang_thai !== 'Đã hủy'" 
-                    (click)="xemChiTiet(p)" 
+           <button *ngIf="((p.trang_thai || p.status) === 'Đã gửi phiếu' || !(p.trang_thai || p.status)) && (p.trang_thai || p.status) !== 'Đã hủy'"
+                    (click)="xemChiTiet(p)"
                     class="btn-space btn-gray">
             Kiểm tra duyệt phiếu
             </button>
 
-            <button *ngIf="p.trang_thai === 'Đã duyệt'" (click)="xemChiTiet(p)" class="btn-bluewater">
+            <button *ngIf="(p.trang_thai || p.status) === 'Đã duyệt'" (click)="xemChiTiet(p)" class="btn-bluewater">
                 Xác nhận hàng vào kho
             </button>
 
             &nbsp;
-            
-            <button 
+
+            <button
             *ngIf="p.trang_thai === 'Đã gửi phiếu' || p.trang_thai === 'Đã hủy' || p.trang_thai === 'Đã duyệt'"
-            (click)="huyPhieu(p)" 
+            (click)="huyPhieu(p)"
             [disabled]="p.trang_thai === 'Đã hủy'"
             [ngClass]="{
                 'disabled-button': p.trang_thai === 'Đã hủy',
@@ -165,7 +165,7 @@
                             <td>{{ sp.product_code }}</td>
                             <td>{{ sp.product_name }}</td>
                             <td>{{ sp.product_type }}</td>
-                            
+
                             <td>{{ sp.unit }}</td>
                             <td>{{ sp.weight }} kg</td>
                             <td>{{ sp.area }} m²</td>
@@ -184,7 +184,7 @@
                     <!-- Tổng tiền -->
                     <div class="total-amount">
                     <strong> Tổng cộng:</strong>
-                    {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ 
+                    {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ
                     </div>
 
                     <br>
@@ -199,15 +199,15 @@
                     {{ selectedPhieu?.trang_thai === 'Đã duyệt' ? 'Cập nhật phản hồi' : '✅ Duyệt phiếu nhập' }}
                 </button>
 
-                <button 
-                    [disabled]="selectedPhieu.trang_thai !== 'Đã duyệt'" 
-                    [class.disabled-button]="selectedPhieu.trang_thai !== 'Đã duyệt'" 
+                <button
+                    [disabled]="selectedPhieu.trang_thai !== 'Đã duyệt'"
+                    [class.disabled-button]="selectedPhieu.trang_thai !== 'Đã duyệt'"
                     (click)="moPopupNhapKho()">
                     ✅ Xác nhận nhập hàng vào kho
-                </button> 
+                </button>
                 </div>
 
-                    
+
 
 <!----------------- 📦 POPUP Xác nhận nhập kho -->
                     <div class="modal" *ngIf="popupNhapKhoMo">
@@ -295,7 +295,12 @@
                         <!-- Logo và tên nhà cung cấp -->
                         <div style="display: flex; align-items: center; gap: 20px; margin-top: 10px;" class="supplier-logo">
                         <div>
-                            <p><strong>Tên nhà cung cấp:</strong> {{ selectedPhieu.supplier_name }} <img [src]="selectedPhieu.logo_url" alt="Logo nhà cung cấp" /></p>
+                            <p>
+                                <strong>Tên nhà cung cấp:</strong> {{ selectedPhieu.supplier_name }}
+                                <ng-container *ngIf="selectedPhieu.logo_url">
+                                    <img [src]="selectedPhieu.logo_url" alt="Logo nhà cung cấp" style="height: 40px; margin-left: 10px; vertical-align: middle;" />
+                                </ng-container>
+                            </p>
                         </div>
                         </div>
 
@@ -377,16 +382,16 @@
                         </tbody>
                         </table>
                         </div>
-                        
+
                         <!-- Tổng tiền -->
                         <div class="total-amount" style="margin-top: 15px;">
                         <strong>Tổng cộng:</strong> {{ selectedPhieu.total_amount | number:'1.0-0' }} VNĐ
                         </div>
 
                         <!-- Nút hành động -->
-                        <!-- Nút hành động --> 
+                        <!-- Nút hành động -->
                         <div class="button-group">
-                        <button 
+                        <button
                             (click)="xacNhanNhapKhoChinhThuc()"
                             [disabled]="selectedPhieu?.trang_thai === 'Hoàn tất nhập hàng'"
                             [ngStyle]="{ opacity: selectedPhieu?.trang_thai === 'Hoàn tất nhập hàng' ? '0.6' : '1' }"
@@ -461,7 +466,7 @@
                     </div>
                     </div>
 
-                    <!-- ✅ MINI POPUP NHẬP SỐ LƯỢNG --> 
+                    <!-- ✅ MINI POPUP NHẬP SỐ LƯỢNG -->
                     <div class="mini-popup" *ngIf="chonSoLuongPopupMo">
                     <div class="mini-popup-content">
                         <h4>Nhập số lượng cho pallet: {{ palletDangNhapSoLuong.name }}</h4>
@@ -472,7 +477,7 @@
                         </div>
 
                         <input type="number" [(ngModel)]="soLuongMuonThem" min="1" placeholder="Nhập số lượng" />
-                        
+
                         <div class="mini-popup-actions">
                         <button (click)="xacNhanThemSoLuongVaoPallet()">Xác nhận</button>
                         <button (click)="chonSoLuongPopupMo = false" style="background-color: red;">Huỷ</button>
@@ -487,6 +492,6 @@
         </ng-container>
     </table>
 
-    
+
 
 </div>

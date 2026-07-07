@@ -32,7 +32,7 @@
   <!-- ✅ Kết quả tra cứu NCC -->
   <div *ngIf="nhaCungCap && traTheoSanPham" class="ncc-info-card animate-slide">
     <div class="ncc-logo-wrapper">
-      <img *ngIf="nhaCungCap.logo_url" [src]="nhaCungCap.logo_url" class="ncc-logo" />
+      <img [src]="nhaCungCap.logo_url || 'assets/img/logogpt.png'" class="ncc-logo" [alt]="nhaCungCap.supplier_name" />
     </div>
 
     <h3 class="ncc-name">{{ nhaCungCap.supplier_name }}</h3>
@@ -55,7 +55,7 @@
         class="logo-card animate-fade"
         (click)="chonNhaCungCap(logo)"
       >
-        <img [src]="logo.logo_url" [alt]="logo.supplier_name" />
+        <img [src]="logo.logo_url || 'assets/img/logogpt.png'" [alt]="logo.supplier_name" />
         <p>{{ logo.supplier_name }}</p>
       </div>
     </div>
@@ -75,8 +75,8 @@
 
         <div class="carousel-content">
           <img
-            *ngIf="lichSuNhap[logoIndex]?.logo_url"
-            [src]="lichSuNhap[logoIndex].logo_url"
+            *ngIf="lichSuNhap[logoIndex]"
+            [src]="lichSuNhap[logoIndex]?.logo_url || 'assets/img/logogpt.png'"
             class="carousel-image"
           />
         </div>
@@ -99,7 +99,7 @@
 
         <div class="product-grid">
           <div class="product-card" *ngFor="let sp of lichSuNhap[logoIndex]?.san_pham">
-            <img [src]="sp.image_url || 'https://via.placeholder.com/80x80?text=No+Image'" alt="Ảnh sản phẩm" />
+            <img [src]="sp.image_url || 'assets/img/logoproduct.svg'" alt="Ảnh sản phẩm" />
             <div class="info">
               <div class="code">ID: {{ sp.code }}</div>
               <div class="name">{{ sp.name }}</div>

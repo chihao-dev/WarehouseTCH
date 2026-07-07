@@ -130,8 +130,8 @@ export class LichsukiemkeComponent implements OnInit {
       const ngayTaoFilter = this.boLoc.ngayTao ? new Date(this.boLoc.ngayTao).toDateString() : null;
 
       const matchDot =
-        (!this.boLoc.maDot || dot.ma_dot.toLowerCase().includes(this.boLoc.maDot.toLowerCase())) &&
-        (!this.boLoc.tenDot || dot.ten_dot.toLowerCase().includes(this.boLoc.tenDot.toLowerCase())) &&
+        (!this.boLoc.maDot || dot.batch_code?.toLowerCase().includes(this.boLoc.maDot.toLowerCase())) &&
+        (!this.boLoc.tenDot || dot.batch_name?.toLowerCase().includes(this.boLoc.tenDot.toLowerCase())) &&
         (!this.boLoc.nguoiTao || dot.created_by_email?.toLowerCase().includes(this.boLoc.nguoiTao.toLowerCase())) &&
         (!this.boLoc.ngayTao || ngayDot === ngayTaoFilter);
 

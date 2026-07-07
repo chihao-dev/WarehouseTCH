@@ -54,7 +54,7 @@ export class LocationManagerComponent implements OnInit {
   selectedDestinationPallet: any = null;
   dangChoXacNhanChuyen: boolean = false;
   dangChuyenHangLe: boolean = false;  // true nếu đang chuyển hàng đơn lẻ
-  
+
   transferLogs: any[] = [];
 
   constructor(private http: HttpClient) {}
@@ -68,11 +68,13 @@ export class LocationManagerComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/kho/overview`).subscribe({
       next: res => {
         // Gán thống kê kho
-        this.totalWeight = res.overview.tong_suc_chua_kg;
-        this.totalArea = res.overview.tong_suc_chua_m2;
+        if (res.overview) {
+          this.totalWeight = res.overview.tong_suc_chua_kg || 0;
+          this.totalArea = res.overview.tong_suc_chua_m2 || 0;
+        }
 
         // Gán danh sách khu vực
-        this.areas = res.areas;
+        this.areas = res.areas || [];
 
         // Gọi lần đầu luôn pallet cho khu vực 0
         if (this.areas.length > 0) {
@@ -103,7 +105,12 @@ export class LocationManagerComponent implements OnInit {
 
   onAreaChange(index: number) {
     this.selectedAreaIndex = index;
-    const khuVucId = this.areas[index]?.khu_vuc_id;
+    const khuVucId = this.areas[index]?.id;
+
+    if (!khuVucId) {
+      console.warn('⚠ Không tìm thấy ID khu vực tại index:', index);
+      return;
+    }
 
     this.http.get<any[]>(`${environment.apiUrl}/kho/area/${khuVucId}`).subscribe({
       next: data => {

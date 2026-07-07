@@ -443,22 +443,25 @@ export class QuanlyhangtonComponent implements OnInit {
     }
 
     this.http.post<any>(`${environment.apiUrl}/kiem-ke/tao-dot`, {
-      ten_dot: this.newBatchName,
+      batch_name: this.newBatchName,
       created_by_email: email
     }).subscribe({
       next: (res) => {
         if (!res.success) return alert('❌ ' + res.message);
 
+        const maDot = res.batch_code || res.ma_dot;
+        const tenDot = res.batch_name || res.ten_dot;
+
         // ✅ Lưu thông tin đợt kiểm kê hiện tại
         this.currentInventoryBatchId = res.dotId;
-        this.currentBatchCode = res.ma_dot;
-        this.currentBatchName = res.ten_dot;
+        this.currentBatchCode = maDot;
+        this.currentBatchName = tenDot;
         this.currentBatchCreatedAt = res.created_at;
 
         // ✅ Lưu thông tin đợt vào localStorage
         localStorage.setItem('dot_id_moi_nhat', res.dotId.toString());
-        localStorage.setItem('ten_dot_moi_nhat', res.ten_dot);
-        localStorage.setItem('ma_dot_moi_nhat', res.ma_dot);
+        localStorage.setItem('ten_dot_moi_nhat', tenDot);
+        localStorage.setItem('ma_dot_moi_nhat', maDot);
         localStorage.setItem('ngay_tao_dot_moi_nhat', res.created_at);
 
         // ✅ Lấy danh sách sản phẩm được chọn
@@ -468,7 +471,7 @@ export class QuanlyhangtonComponent implements OnInit {
 
         // ✅ Gán sản phẩm vào đợt kiểm kê
         this.http.post<any>(`${environment.apiUrl}/kiem-ke/gan-san-pham-vao-dot`, {
-          dot_id: res.dotId,
+          audit_batch_id: res.dotId, // Cập nhật đúng tên biến của backend
           product_codes: selectedCodes
         }).subscribe({
           next: (ganRes) => {
@@ -477,7 +480,7 @@ export class QuanlyhangtonComponent implements OnInit {
             // ✅ LƯU LẠI DANH SÁCH SẢN PHẨM ĐÃ GÁN
             localStorage.setItem('sp_kiem_ke', JSON.stringify(selectedCodes)); // <- thêm dòng này
 
-            alert(`✅ Đã tạo đợt "${res.ten_dot}" và gán ${selectedCodes.length} sản phẩm!`);
+            alert(`✅ Đã tạo đợt "${tenDot}" và gán ${selectedCodes.length} sản phẩm!`);
             this.showCreateBatchModal = false;
             this.loadProducts();
           },
@@ -526,7 +529,7 @@ export class QuanlyhangtonComponent implements OnInit {
     }
 
     this.http.post<any>(`${environment.apiUrl}/kiem-ke/gan-san-pham-vao-dot`, {
-      dot_id: this.currentInventoryBatchId,
+      audit_batch_id: this.currentInventoryBatchId,
       product_codes: maMoi
     }).subscribe({
       next: (response) => {

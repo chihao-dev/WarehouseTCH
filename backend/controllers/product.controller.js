@@ -10,6 +10,8 @@ const ExcelJS = require('exceljs');
 const ProductService = require('../services/product.service');
 const UserProfileService = require('../services/user.service');
 
+const KHOI_LUONG_PALLET_MAX = 500;
+
 exports.put__api_products_detail_id = (req, res) => {
   const { id } = req.params;
   const {
@@ -152,38 +154,24 @@ exports.post__api_products_detail_check_multiple = (req, res) => {
     });
 };
 
-exports.post__api_nhap_kho = (req, res) => {
+exports.post__api_nhap_kho = async (req, res) => {
   const { danh_sach_san_pham } = req.body;
 
   if (!Array.isArray(danh_sach_san_pham) || danh_sach_san_pham.length === 0) {
     return res.status(400).json({ message: 'Không có sản phẩm để lưu' });
   }
 
-  let processed = 0;
-  const total = danh_sach_san_pham.length;
-
-  for (let sp of danh_sach_san_pham) {
-    const oldCode = sp.old_product_code || sp.product_code;
-
-    // Nếu người dùng bật "Cập nhật thêm" thì cũng thêm mới
-    insertNewProduct(sp, (errInsert) => {
-      if (errInsert) {
-        console.error('❌ Lỗi khi thêm sản phẩm:', errInsert);
-        return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm' });
-      }
-
-      processed++;
-      if (processed === total) return res.json({ message: '📦 Nhập kho hoàn tất!' });
-    });
-  }
-
-  // ✅ Hàm insert mới sử dụng Service để tính toán và lưu DB
-  async function insertNewProduct(sp, callback) {
-    try {
+  try {
+    // Duyệt tuần tự để tránh lỗi chồng chéo transaction trên cùng 1 connection
+    for (const sp of danh_sach_san_pham) {
       await ProductService.createProductDetail(sp, db);
-      callback(null);
-    } catch (errInsert) {
-      callback(errInsert);
+    }
+
+    return res.json({ message: '📦 Nhập kho hoàn tất!' });
+  } catch (err) {
+    console.error('❌ Lỗi khi nhập kho:', err);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Lỗi khi thêm sản phẩm', details: err.message });
     }
   }
 };
@@ -256,7 +244,11 @@ exports.get__api_products_detail_filter = (req, res) => {
       pd.product_code,
       MAX(pd.product_name) AS product_name,
       MAX(pd.product_type) AS product_type,
-      MAX(pd.image_url) AS image_url,
+      MAX(CASE
+        WHEN pd.image_url LIKE 'http%' THEN pd.image_url
+        WHEN pd.image_url IS NOT NULL THEN CONCAT('http://localhost:3000', pd.image_url)
+        ELSE NULL
+      END) AS image_url,
       MAX(pd.unit) AS unit,
       SUM(pd.quantity) AS quantity,
       SUM(pd.weight) AS weight,
@@ -269,7 +261,11 @@ exports.get__api_products_detail_filter = (req, res) => {
       MAX(pd.warehouse_area_id) AS warehouse_area_id,
       MAX(kv.area_name) AS area_name,
       MAX(pd.supplier_name) AS supplier_name,
-      MAX(pd.logo_url) AS logo_url,
+      MAX(CASE
+        WHEN pd.logo_url LIKE 'http%' THEN pd.logo_url
+        WHEN pd.logo_url IS NOT NULL THEN CONCAT('http://localhost:3000', pd.logo_url)
+        ELSE NULL
+      END) AS logo_url,
       MAX(pd.import_date) AS import_date,
       MAX(pd.location) AS location,         -- ✅ THÊM DÒNG NÀY
       MAX(pd.id) AS id
@@ -573,7 +569,7 @@ exports.get__api_products_detail_check_available_code_required = async (req, res
 
 exports.get__api_kho_overview = (req, res) => {
   const query1 = `SELECT * FROM warehouse_capacity`;
-  const query2 = `SELECT * FROM warehouse_areas ORDER BY warehouse_area_id`;
+  const query2 = `SELECT * FROM warehouse_areas ORDER BY id`;
 
   db.query(query1, (err1, result1) => {
     if (err1) {

@@ -44,8 +44,8 @@
      <ng-container *ngFor="let dot of locDanhSachDot()">
         <!-- Dòng chính -->
         <tr>
-          <td>{{ dot.ma_dot }}</td>
-          <td>{{ dot.ten_dot }}</td>
+          <td>{{ dot.batch_code }}</td>
+          <td>{{ dot.batch_name }}</td>
           <td>{{ dot.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
           <td>{{ dot.created_by_email }}</td>
           <td>
@@ -63,7 +63,7 @@
           <td colspan="5">
             <div *ngIf="isValidArray(chiTietTheoDot[dot.id]); else dangTai">
               <h2 class="text-start mb-3">
-                📑 Chi tiết: <strong>{{ dot.ten_dot }}</strong> ({{ dot.ma_dot }})
+                📑 Chi tiết: <strong>{{ dot.batch_name }}</strong> ({{ dot.batch_code }})
               </h2>
 
              <table class="table table-sm table-bordered align-middle">
@@ -87,7 +87,7 @@
                     <td>{{ i + 1 }}</td>
                     <td>
                     <img
-                        [src]="sp.image_url || 'https://via.placeholder.com/40?text=No+Img'"
+                        [src]="sp.image_url || 'assets/img/logoproduct.svg'"
                         width="40"
                         height="40"
                         class="rounded shadow-sm"

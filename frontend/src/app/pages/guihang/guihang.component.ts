@@ -180,11 +180,18 @@ export class GuihangComponent {
 
     // Logo và sản phẩm như trước
 
-    // ✅ Nếu chưa có logo nhưng sản phẩm có logo_url -> gán logo mặc định
-    if (!this.formData.logo && this.formData.products.length > 0) {
-      const firstLogo = this.formData.products[0].logo_url || this.formData.products[0].image_url || '';
-      if (firstLogo) {
-        this.formData.logo = firstLogo;
+    // ✅ Nếu chưa có logo file, fallback theo thứ tự ưu tiên:
+    // 1. logoPreview (URL lấy từ NCC có sẵn)
+    // 2. logo_url từ sản phẩm đầu tiên
+    if (!this.formData.logo) {
+      if (this.formData.logoPreview && typeof this.formData.logoPreview === 'string' && !this.formData.logoPreview.startsWith('data:')) {
+        // logoPreview là URL thật (không phải base64 preview)
+        this.formData.logo = this.formData.logoPreview;
+      } else if (this.formData.products.length > 0) {
+        const firstLogo = this.formData.products[0].logo_url || '';
+        if (firstLogo) {
+          this.formData.logo = firstLogo;
+        }
       }
     }
 
